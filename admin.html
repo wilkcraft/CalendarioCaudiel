@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendario Caudiel 2025-2026</title>
+    <link rel="icon" href="caudielLogo.png" />
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background: #fce4ec;
+        padding: 20px;
+        margin: 0;
+        color: #5d5d5d;
+      }
+
+      header {
+        position: relative;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .logo-img {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        height: 80px;
+        width: auto;
+        pointer-events: none; /* hace que no se pueda clicar */
+        user-select: none; /* evita que se seleccione */
+      }
+
+      h1 {
+        text-align: center;
+        color: #d81b60;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+      }
+
+      .dia-semana {
+        text-align: center;
+        font-weight: bold;
+        padding: 10px 0;
+        border-bottom: 1px solid #f8bbd0;
+        background-color: #ffe3ee;
+      }
+
+      .navegacion {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      .navegacion button {
+        padding: 12px 24px;
+        font-size: 1.2em;
+        cursor: pointer;
+        background-color: #ff80ab;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        transition: background-color 0.3s;
+        margin: 0 10px;
+      }
+
+      .navegacion button:hover {
+        background-color: #f50057;
+      }
+
+      .calendario-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      .calendario {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        width: 90%;
+        max-width: 1200px; /* Ajusta el ancho máximo */
+        margin: 10px;
+        background-color: #fff5f8;
+        border: 2px solid #f8bbd0;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+      }
+
+      .calendario h2 {
+        grid-column: span 7;
+        text-align: center;
+        margin: 0;
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #d81b60;
+      }
+
+      .calendario .dia {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 15px;
+        min-height: 100px;
+        border: 2px solid #f8bbd0;
+        border-radius: 8px;
+        background-color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .calendario .dia:hover {
+        background-color: #fce4ec;
+      }
+
+      .numero {
+        font-weight: bold;
+        font-size: 1.5em;
+        color: #d81b60;
+        margin-bottom: 5px;
+      }
+
+      .nota {
+        font-size: 1em;
+        color: #555;
+        text-align: center;
+        height: 40px;
+        overflow: hidden;
+        font-style: italic;
+      }
+
+      .nota.cargando {
+        color: #f50057;
+      }
+
+      .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #ffffff;
+        padding: 20px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        border-radius: 15px;
+        z-index: 10;
+        display: none;
+        max-width: 400px;
+        width: 90%;
+        box-sizing: border-box;
+      }
+
+      .popup h3 {
+        margin-bottom: 10px;
+        font-size: 1.5em;
+        color: #d81b60;
+        text-align: center;
+      }
+
+      .popup textarea {
+        width: 100%;
+        height: 100px;
+        padding: 10px;
+        font-size: 1em;
+        border: 1px solid #f8bbd0;
+        border-radius: 8px;
+        resize: none;
+      }
+
+      .popup button {
+        margin-top: 10px;
+        padding: 12px;
+        font-size: 1.2em;
+        background-color: #d81b60;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 100%;
+      }
+
+      .popup button:hover {
+        background-color: #f50057;
+      }
+
+      #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 5;
+        display: none;
+      }
+      @media (max-width: 600px) {
+        .calendario {
+          display: flex !important;
+          flex-direction: column;
+        }
+
+        .dia-semana {
+          display: none; /* Ocultamos los encabezados de semana en móviles */
+        }
+
+        .calendario .dia {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 5px;
+          border: 1px solid #f8bbd0;
+          padding: 10px;
+          margin-bottom: 10px;
+        }
+
+        .calendario .dia .numero {
+          font-size: 1.2em;
+          margin-bottom: 0;
+          margin-right: 10px;
+        }
+
+        .nota {
+          text-align: left;
+          flex-grow: 1;
+        }
+
+        .nombre-dia {
+          font-weight: bold;
+          color: #d81b60;
+          font-size: 1.1em;
+          display: none;
+        }
+        .dia-semana {
+          display: none;
+        }
+        .calendario h2 {
+          font-size: 1.5em;
+          grid-column: span 1;
+        }
+        
+        .dia img {
+          max-width: 100%;
+          margin-top: 8px;
+          border-radius: 8px;
+        }
+        .logo-img {
+          position: fixed;
+          top: 5px;
+          left: 5px;
+          height: 70px;
+          width: auto;
+          pointer-events: none;
+          user-select: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img src="caudiel.png" alt="Caudiel Logo" class="logo-img" />
+      <h1>Calendario Caudiel 2025-2026</h1>
+    </header>
+
+    <div class="navegacion">
+      <button id="btn-anterior">Anterior</button>
+      <button id="btn-siguiente">Siguiente</button>
+    </div>
+
+    <div class="calendario-container" id="calendarios"></div>
+
+    <!-- Overlay y Popup -->
+    <div id="overlay"></div>
+    <div class="popup" id="popup">
+      <h3 id="titulo-dia">Día</h3>
+      <textarea id="input-nota" placeholder="Escribe una nota..."></textarea>
+      <button id="btn-guardar">Guardar</button>
+      <button class="popupButton">Cerrar</button>
+    </div>
+
+    <script type="module">
+      if (sessionStorage.getItem("isLoggedIn") !== "true") {
+        alert("Acceso no autorizado. Serás redirigido al inicio.");
+        window.location.href = "index.html";
+      }
+
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBp-39_WdV6uQ02mvMHu4ORLXFc96RTaOM",
+        authDomain: "calendariocaudiel.firebaseapp.com",
+        projectId: "calendariocaudiel",
+        storageBucket: "calendariocaudiel.appspot.com",
+        messagingSenderId: "780740498474",
+        appId: "1:780740498474:web:d741fd88bc94f926685f53",
+        measurementId: "G-PH31VFY827",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const calendarios = document.getElementById("calendarios");
+      const popup = document.getElementById("popup");
+      const overlay = document.getElementById("overlay");
+      const inputNota = document.getElementById("input-nota");
+      const tituloDia = document.getElementById("titulo-dia");
+      const btnGuardar = document.getElementById("btn-guardar");
+
+      const inputImagen = document.createElement("input");
+      inputImagen.type = "file";
+      inputImagen.accept = "image/*";
+      inputImagen.id = "input-imagen";
+      inputImagen.style.marginTop = "10px";
+      popup.insertBefore(inputImagen, btnGuardar);
+
+      let diaSeleccionado = null;
+      const today = new Date();
+      let currentYear = today.getFullYear();
+      let currentMonth = today.getMonth();
+      let currentWeekIndex = 0;
+      const modoSemana = window.innerWidth <= 600;
+
+      const meses = [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+      ];
+
+      const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+      // Calcular automáticamente la semana actual en modo móvil
+      if (modoSemana) {
+        const primerDiaMes = new Date(currentYear, currentMonth, 1);
+        const diaSemana = primerDiaMes.getDay();
+        const offsetToMonday = diaSemana === 0 ? -6 : 1 - diaSemana;
+        const primerLunes = new Date(primerDiaMes);
+        primerLunes.setDate(primerLunes.getDate() + offsetToMonday);
+
+        const diffDias = Math.floor(
+          (today - primerLunes) / (1000 * 60 * 60 * 24)
+        );
+        currentWeekIndex = Math.floor(diffDias / 7);
+      }
+
+      async function crearCalendario(year, month) {
+        const diasEnMes = new Date(year, month + 1, 0).getDate();
+        let primerDia = new Date(year, month, 1).getDay();
+        primerDia = primerDia === 0 ? 6 : primerDia - 1;
+
+        calendarios.innerHTML = "";
+        const calendario = document.createElement("div");
+        calendario.classList.add("calendario");
+
+        const titulo = document.createElement("h2");
+        titulo.textContent = `${meses[month]} ${year}`;
+        calendario.appendChild(titulo);
+
+        if (!modoSemana) {
+          diasSemana.forEach((d) => {
+            const celda = document.createElement("div");
+            celda.className = "dia-semana";
+            celda.textContent = d;
+            calendario.appendChild(celda);
+          });
+
+          for (let i = 0; i < primerDia; i++) {
+            calendario.appendChild(document.createElement("div"));
+          }
+        }
+
+        let diasParaMostrar = [];
+
+        if (modoSemana) {
+          const diasEnEstaSemana = [];
+
+          const baseDate = new Date(year, month, 1);
+          const diaSemana = baseDate.getDay();
+          const offsetToMonday = diaSemana === 0 ? -6 : 1 - diaSemana;
+          const startDate = new Date(baseDate);
+          startDate.setDate(
+            baseDate.getDate() + offsetToMonday + currentWeekIndex * 7
+          );
+
+          for (let i = 0; i < 7; i++) {
+            const date = new Date(startDate);
+            date.setDate(startDate.getDate() + i);
+            diasEnEstaSemana.push({
+              date,
+              dia: date.getDate(),
+              mes: date.getMonth(),
+              año: date.getFullYear(),
+            });
+          }
+
+          diasParaMostrar = diasEnEstaSemana;
+        } else {
+          for (let dia = 1; dia <= diasEnMes; dia++) {
+            diasParaMostrar.push({
+              dia,
+              mes: month,
+              año: year,
+              date: new Date(year, month, dia),
+            });
+          }
+        }
+
+        for (const { date, dia, mes, año } of diasParaMostrar) {
+          const celda = document.createElement("div");
+          celda.className = "dia";
+          celda.dataset.dia = dia;
+
+          if (modoSemana) {
+            const nombreDia = document.createElement("div");
+            nombreDia.className = "nombre-dia";
+            nombreDia.textContent =
+              diasSemana[date.getDay() === 0 ? 6 : date.getDay() - 1];
+            celda.appendChild(nombreDia);
+          }
+
+          const numero = document.createElement("div");
+          numero.className = "numero";
+          numero.textContent = dia;
+
+          const nota = document.createElement("div");
+          nota.className = "nota cargando";
+          nota.textContent = "Cargando...";
+
+          celda.appendChild(numero);
+          celda.appendChild(nota);
+
+          celda.addEventListener("click", () => abrirPopup(dia, nota));
+          calendario.appendChild(celda);
+
+          try {
+            const docRef = doc(db, `notas${año}${mes + 1}`, String(dia));
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              nota.textContent = data.nota || "";
+
+              if (data.imagenBase64) {
+                const img = document.createElement("img");
+                img.src = data.imagenBase64;
+                img.alt = "Imagen del día";
+                img.style.maxWidth = "100%";
+                img.style.marginTop = "10px";
+                celda.appendChild(img);
+              }
+            } else {
+              nota.textContent = "";
+            }
+          } catch (error) {
+            nota.textContent = "[Error]";
+            console.error(error);
+          }
+        }
+
+        calendarios.appendChild(calendario);
+      }
+
+      function abrirPopup(dia, notaElemento) {
+        diaSeleccionado = dia;
+        tituloDia.textContent = `Nota para el día ${dia}`;
+        inputNota.value = notaElemento.textContent || "";
+        inputImagen.value = "";
+        popup.style.display = "block";
+        overlay.style.display = "block";
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .querySelector(".popupButton")
+          .addEventListener("click", function () {
+            document.getElementById("popup").style.display = "none";
+            document.getElementById("overlay").style.display = "none";
+          });
+      });
+
+      btnGuardar.addEventListener("click", async () => {
+        const nuevaNota = inputNota.value.trim();
+        let imagenBase64 = "";
+
+        if (inputImagen.files.length > 0) {
+          const file = inputImagen.files[0];
+          imagenBase64 = await fileToBase64(file);
+        }
+
+        const docRef = doc(
+          db,
+          `notas${currentYear}${currentMonth + 1}`,
+          String(diaSeleccionado)
+        );
+        try {
+          await setDoc(docRef, {
+            nota: nuevaNota,
+            imagenBase64: imagenBase64 || "",
+          });
+
+          const celdaDia = document.querySelector(
+            `.dia[data-dia='${diaSeleccionado}']`
+          );
+          const notaEl = celdaDia.querySelector(".nota");
+          notaEl.textContent = nuevaNota || "";
+
+          const imgAntigua = celdaDia.querySelector("img");
+          if (imgAntigua) imgAntigua.remove();
+
+          if (imagenBase64) {
+            const img = document.createElement("img");
+            img.src = imagenBase64;
+            img.alt = "Imagen del día";
+            img.style.maxWidth = "100%";
+            img.style.marginTop = "10px";
+            celdaDia.appendChild(img);
+          }
+
+          document.getElementById("popup").style.display = "none";
+          document.getElementById("overlay").style.display = "none";
+        } catch (error) {
+          console.error("Error al guardar:", error);
+          alert("Error al guardar la nota o imagen.");
+        }
+      });
+
+      function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      document.getElementById("btn-anterior").addEventListener("click", () => {
+        if (modoSemana) {
+          if (currentWeekIndex > 0) {
+            currentWeekIndex--;
+          } else {
+            if (currentMonth === 0) {
+              currentMonth = 11;
+              currentYear--;
+            } else {
+              currentMonth--;
+            }
+            const diasEnMes = new Date(
+              currentYear,
+              currentMonth + 1,
+              0
+            ).getDate();
+            const baseDate = new Date(currentYear, currentMonth, 1);
+            const primerDia = baseDate.getDay();
+            const offset = primerDia === 0 ? -6 : 1 - primerDia;
+            const primerLunes = new Date(baseDate);
+            primerLunes.setDate(baseDate.getDate() + offset);
+            const ultimoDia = new Date(currentYear, currentMonth + 1, 0);
+            const diff = Math.floor(
+              (ultimoDia - primerLunes) / (1000 * 60 * 60 * 24)
+            );
+            currentWeekIndex = Math.floor(diff / 7);
+          }
+        } else {
+          if (currentMonth === 0) {
+            currentMonth = 11;
+            currentYear--;
+          } else {
+            currentMonth--;
+          }
+        }
+        crearCalendario(currentYear, currentMonth);
+      });
+
+      document.getElementById("btn-siguiente").addEventListener("click", () => {
+        if (modoSemana) {
+          const diasEnMes = new Date(
+            currentYear,
+            currentMonth + 1,
+            0
+          ).getDate();
+          const baseDate = new Date(currentYear, currentMonth, 1);
+          const primerDia = baseDate.getDay();
+          const offset = primerDia === 0 ? -6 : 1 - primerDia;
+          const primerLunes = new Date(baseDate);
+          primerLunes.setDate(baseDate.getDate() + offset);
+          const ultimoDia = new Date(currentYear, currentMonth + 1, 0);
+          const diff = Math.floor(
+            (ultimoDia - primerLunes) / (1000 * 60 * 60 * 24)
+          );
+          const maxWeek = Math.floor(diff / 7);
+
+          if (currentWeekIndex < maxWeek) {
+            currentWeekIndex++;
+          } else {
+            currentWeekIndex = 0;
+            if (currentMonth === 11) {
+              currentMonth = 0;
+              currentYear++;
+            } else {
+              currentMonth++;
+            }
+          }
+        } else {
+          if (currentMonth === 11) {
+            currentMonth = 0;
+            currentYear++;
+          } else {
+            currentMonth++;
+          }
+        }
+        crearCalendario(currentYear, currentMonth);
+      });
+
+      crearCalendario(currentYear, currentMonth);
+    </script>
+  </body>
+</html>
