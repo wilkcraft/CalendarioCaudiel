@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendario Caudiel 2025-2026</title>
+    <link rel="icon" href="caudielLogo.png" />
+    <!-- Vincular el manifest -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0044cc" />
+
+    <!-- Icono para iOS (Safari necesita esto) -->
+    <link rel="apple-touch-icon" href="logoCaudiel.png" />
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background: #fce4ec;
+        padding: 20px;
+        margin: 0;
+        color: #5d5d5d;
+      }
+
+      header {
+        position: relative;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      header .login-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+
+      .logo-img {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        height: 80px;
+        width: auto;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .dia-semana {
+        text-align: center;
+        font-weight: bold;
+        padding: 10px 0;
+        border-bottom: 1px solid #f8bbd0;
+        background-color: #ffe3ee;
+      }
+
+      h1 {
+        color: #d81b60;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+      }
+
+      .login-btn {
+        padding: 10px 20px;
+        background-color: #d81b60;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .login-btn:hover {
+        background-color: #f50057;
+      }
+
+      .login-form {
+        position: absolute;
+        top: 70px;
+        right: 20px;
+        background: #ffffff;
+        border: 2px solid #f8bbd0;
+        border-radius: 10px;
+        padding: 15px;
+        display: none;
+        z-index: 100;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .login-form input,
+      .login-form button {
+        display: block;
+        margin-bottom: 10px;
+        padding: 10px;
+        width: 200px;
+        font-size: 1em;
+        border-radius: 5px;
+      }
+
+      .login-form button {
+        background-color: #d81b60;
+        color: white;
+        border: none;
+      }
+
+      .login-form button:hover {
+        background-color: #f50057;
+      }
+
+      .navegacion {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .navegacion button {
+        padding: 12px 24px;
+        font-size: 1.2em;
+        cursor: pointer;
+        background-color: #ff80ab;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        transition: background-color 0.3s;
+      }
+
+      .navegacion button:hover {
+        background-color: #f50057;
+      }
+
+      .calendario-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .calendario {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        width: 90%;
+        max-width: 1200px;
+        background-color: #fff5f8;
+        border: 2px solid #f8bbd0;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+      }
+
+      .calendario h2 {
+        grid-column: span 7;
+        text-align: center;
+        font-size: 1.8em;
+        color: #d81b60;
+      }
+
+      .dia {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+        min-height: 100px;
+        border: 2px solid #f8bbd0;
+        border-radius: 8px;
+        background-color: #fff;
+        cursor: pointer;
+      }
+
+      .numero {
+        font-weight: bold;
+        font-size: 1.5em;
+        color: #d81b60;
+        margin-bottom: 5px;
+      }
+
+      .nota {
+        font-size: 1em;
+        color: #555;
+        text-align: center;
+        height: 40px;
+        overflow: hidden;
+        font-style: italic;
+      }
+
+      /* Pop-up (modal) */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+        padding-top: 60px;
+      }
+
+      .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 60%;
+        max-width: 400px;
+        border-radius: 10px;
+      }
+
+      .modal-content img {
+        max-width: 100%;
+        margin-top: 10px;
+        border-radius: 8px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .close {
+        padding: 1px 8px;
+        font-size: 1.2em;
+        background-color: #ff80ab;
+        color: white;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        border: none;
+        border-radius: 50%;
+        transition: background-color 0.3s;
+      }
+
+      .close:hover,
+      .close:focus {
+        background-color: #f50057;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .navegacion select {
+        padding: 10px;
+        font-size: 1em;
+        border-radius: 10px;
+        border: 2px solid #f8bbd0;
+        margin: 0 5px;
+        background-color: white;
+      }
+
+      @media (max-width: 600px) {
+        .calendario {
+          grid-template-columns: 1fr;
+        }
+        .nota {
+          text-align: left;
+          flex-grow: 1;
+        }
+        .calendario h2 {
+          font-size: 1.5em;
+          grid-column: span 1;
+        }
+        .dia img {
+          max-width: 100%;
+          margin-top: 8px;
+          border-radius: 8px;
+        }
+        .logo-img {
+          position: fixed;
+          top: 5px;
+          left: 5px;
+          height: 70px;
+          width: auto;
+          pointer-events: none;
+          user-select: none;
+        }
+        .login-btn {
+          position: fixed !important;
+          top: 10px !important;
+          right: 10px !important;
+          font-size: 1em !important;
+          padding: 10px 20px !important;
+          z-index: 9999 !important;
+        }
+        .login-form {
+          position: fixed !important;
+          top: 60px !important;
+          right: 10px !important;
+          z-index: 9998 !important;
+        }
+        .resumen-semanal {
+          display: flex;
+          justify-content: space-between;
+          background-color: #ffebf0;
+          padding: 10px;
+          margin-bottom: 10px;
+          border: 2px solid #f8bbd0;
+          border-radius: 10px;
+          font-weight: bold;
+          font-size: 0.9em;
+          color: #d81b60;
+        }
+        .resumen-dia {
+          flex: 1;
+          text-align: center;
+          cursor: pointer;
+        }
+        .resumen-dia .alerta {
+          display: inline-block;
+          margin-left: 5px;
+          font-size: 2em;
+          font-weight: bold;
+          color: #ff0033;
+          animation: parpadeo 1s infinite, rebote 1.5s infinite;
+          text-shadow: 1px 1px 2px #fff, 0 0 5px #ff0033;
+        }
+        @keyframes parpadeo {
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0;
+          }
+        }
+        @keyframes rebote {
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-3px);
+          }
+        }
+      }
+      .switch-wrapper {
+        width: 100px;
+        height: 40px;
+        background-color: #fff;
+        border-radius: 10px;
+        margin: 15px auto 0;
+        position: relative;
+        cursor: pointer;
+        border: 2px solid #ccc;
+      }
+
+      #switch-indicador {
+        width: 28px;
+        height: 28px;
+        background-color: #d81b60;
+        border-radius: 6px;
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        transition: all 0.3s ease;
+      }
+    </style>
+  </head>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("service-worker.js")
+        .then(() => console.log("Service Worker registrado"))
+        .catch((err) => console.error("Error en Service Worker:", err));
+    }
+  </script>
+  <body>
+    <header>
+      <img src="caudiel.png" alt="Caudiel Logo" class="logo-img" />
+      <h1>Calendario Caudiel 2025-2026</h1>
+      <button class="login-btn" onclick="toggleLoginForm()">Log In</button>
+      <div class="switch-wrapper" onclick="siguientePaleta()">
+        <div id="switch-indicador"></div>
+      </div>
+    </header>
+
+    <div class="login-form" id="loginForm">
+      <input type="text" id="username" placeholder="Usuario" />
+      <input type="password" id="password" placeholder="Contraseña" />
+      <button onclick="login()">Entrar</button>
+    </div>
+
+    <div class="navegacion">
+      <button id="btn-anterior">Anterior</button>
+      <button id="btn-siguiente">Siguiente</button>
+      <select id="select-mes">
+        <option value="0">Enero</option>
+        <option value="1">Febrero</option>
+        <option value="2">Marzo</option>
+        <option value="3">Abril</option>
+        <option value="4">Mayo</option>
+        <option value="5">Junio</option>
+        <option value="6">Julio</option>
+        <option value="7">Agosto</option>
+        <option value="8">Septiembre</option>
+        <option value="9">Octubre</option>
+        <option value="10">Noviembre</option>
+        <option value="11">Diciembre</option>
+      </select>
+
+      <select id="select-anio">
+        <!-- Opciones serán llenadas dinámicamente por JS -->
+      </select>
+
+      <select id="select-semana" style="display: none">
+        <!-- Opciones de semana solo para móviles -->
+      </select>
+    </div>
+
+    <div class="calendario-container" id="calendarios"></div>
+
+    <!-- Modal (Pop-up) -->
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalFecha"></h2>
+        <p id="modalTexto"></p>
+        <div id="modalImagen"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelector(".close").addEventListener("click", function () {
+          document.getElementById("myModal").style.display = "none";
+        });
+      });
+
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSy...827",
+        authDomain: "calendariocaudiel.firebaseapp.com",
+        projectId: "calendariocaudiel",
+        storageBucket: "calendariocaudiel.appspot.com",
+        messagingSenderId: "780740498474",
+        appId: "1:780740498474:web:d741fd88bc94f926685f53",
+        measurementId: "G-PH31VFY827",
+      };
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const calendarios = document.getElementById("calendarios");
+      let today = new Date();
+      let currentYear = today.getFullYear();
+      let currentMonth = today.getMonth();
+      let currentWeekStartDate = getStartOfWeek(new Date());
+
+      const selectMes = document.getElementById("select-mes");
+      const selectAnio = document.getElementById("select-anio");
+      const selectSemana = document.getElementById("select-semana");
+
+      for (let y = 2024; y <= 2026; y++) {
+        const option = document.createElement("option");
+        option.value = y;
+        option.textContent = y;
+        selectAnio.appendChild(option);
+      }
+
+      selectMes.value = currentMonth;
+      selectAnio.value = currentYear;
+
+      function manejarCambioMesOAnio() {
+        currentYear = parseInt(selectAnio.value);
+        currentMonth = parseInt(selectMes.value);
+
+        // ⚠️ OJO: actualizar semanas ANTES de usar selectSemana.value
+        actualizarSemanas(currentYear, currentMonth, true);
+
+        if (esMovil()) {
+          // Usa la semana seleccionada (ya se actualizó el combo correctamente arriba)
+          currentWeekStartDate = new Date(selectSemana.value);
+        }
+
+        crearCalendario(currentYear, currentMonth);
+      }
+
+      selectMes.addEventListener("change", manejarCambioMesOAnio);
+      selectAnio.addEventListener("change", manejarCambioMesOAnio);
+
+      const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+      const meses = [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+      ];
+
+      function esMovil() {
+        return window.innerWidth <= 600;
+      }
+
+      function actualizarSemanas(year, month, seleccionarSemanaActual = true) {
+        selectSemana.innerHTML = "";
+
+        const primerDiaMes = new Date(year, month, 1);
+        const ultimoDiaMes = new Date(year, month + 1, 0);
+
+        let fechaInicioSemana = getStartOfWeek(primerDiaMes);
+        let semana = 1;
+        let indexSemanaActual = 0;
+
+        while (fechaInicioSemana <= ultimoDiaMes) {
+          const opcion = document.createElement("option");
+          opcion.value = fechaInicioSemana.toISOString();
+
+          const dia = fechaInicioSemana.getDate();
+          const mes = fechaInicioSemana.getMonth();
+
+          opcion.textContent = `Semana ${semana} (${dia} ${meses[mes]})`;
+          selectSemana.appendChild(opcion);
+
+          // Comprobar si es la semana actual
+          if (
+            Math.abs(currentWeekStartDate - fechaInicioSemana) <
+            4 * 24 * 60 * 60 * 1000
+          ) {
+            indexSemanaActual = semana - 1;
+          }
+
+          fechaInicioSemana.setDate(fechaInicioSemana.getDate() + 7);
+          semana++;
+        }
+
+        // Selecciona la semana actual
+        if (seleccionarSemanaActual && selectSemana.options.length > 0) {
+          selectSemana.selectedIndex = indexSemanaActual;
+          currentWeekStartDate = new Date(selectSemana.value);
+        }
+      }
+
+      if (window.innerWidth <= 600) {
+        selectSemana.style.display = "inline-block";
+
+        actualizarSemanas(currentYear, currentMonth);
+
+        selectSemana.addEventListener("change", () => {
+          const fechaSeleccionada = new Date(selectSemana.value);
+          if (!isNaN(fechaSeleccionada)) {
+            currentWeekStartDate = fechaSeleccionada;
+            currentYear = fechaSeleccionada.getFullYear();
+            currentMonth = fechaSeleccionada.getMonth();
+            crearCalendario(currentYear, currentMonth);
+          }
+        });
+
+        selectAnio.addEventListener("change", () => {
+          currentYear = parseInt(selectAnio.value);
+          actualizarSemanas(currentYear, currentMonth, true);
+          crearCalendario(currentYear, currentMonth);
+        });
+      }
+
+      function getStartOfWeek(date) {
+        const day = date.getDay() || 7;
+        const diff = date.getDate() - day + 1;
+        return new Date(date.setDate(diff));
+      }
+
+      async function crearCalendario(year, month) {
+        calendarios.innerHTML = "";
+        const calendario = document.createElement("div");
+        calendario.className = "calendario";
+        const titulo = document.createElement("h2");
+
+        if (esMovil()) {
+          const semanaMes = currentWeekStartDate.getMonth();
+          const semanaAño = currentWeekStartDate.getFullYear();
+          titulo.textContent = `${meses[semanaMes]} ${semanaAño}`;
+          calendario.appendChild(titulo);
+
+          const resumen = document.createElement("div");
+          resumen.className = "resumen-semanal";
+
+          const resumenHandlers = [];
+
+          for (let i = 0; i < 7; i++) {
+            const label = document.createElement("div");
+            label.className = "resumen-dia";
+            label.textContent = diasSemana[i];
+            resumen.appendChild(label);
+            resumenHandlers.push(label);
+          }
+          calendario.appendChild(resumen);
+
+          for (let i = 0; i < 7; i++) {
+            const fecha = new Date(currentWeekStartDate);
+            fecha.setDate(currentWeekStartDate.getDate() + i);
+            const y = fecha.getFullYear();
+            const m = fecha.getMonth();
+            const d = fecha.getDate();
+
+            const celda = document.createElement("div");
+            celda.className = "dia";
+            const numero = document.createElement("div");
+            numero.className = "numero";
+            numero.textContent = d;
+            const nota = document.createElement("div");
+            nota.className = "nota";
+            nota.textContent = "Cargando...";
+
+            celda.append(numero, nota);
+            calendario.appendChild(celda);
+
+            celda.addEventListener("click", () => {
+              mostrarModal(d, m, y);
+            });
+
+            try {
+              const docRef = doc(db, `notas${y}${m + 1}`, String(d));
+              const docSnap = await getDoc(docRef);
+              if (docSnap.exists()) {
+                const data = docSnap.data();
+                nota.textContent = data.nota || "";
+                if (data.imagenBase64) {
+                  const img = document.createElement("img");
+                  img.src = data.imagenBase64;
+                  img.alt = "Imagen del día";
+                  celda.appendChild(img);
+                }
+                if (
+                  (data.nota && data.nota.trim() !== "") ||
+                  data.imagenBase64
+                ) {
+                  const alerta = document.createElement("span");
+                  alerta.textContent = "!";
+                  alerta.className = "alerta";
+                  resumenHandlers[i].appendChild(alerta);
+                  resumenHandlers[i].addEventListener("click", () => {
+                    mostrarModal(d, m, y);
+                  });
+                }
+              } else {
+                nota.textContent = "";
+              }
+            } catch (e) {
+              nota.textContent = "[Error]";
+              console.error(e);
+            }
+          }
+        } else {
+          titulo.textContent = `${meses[month]} ${year}`;
+          calendario.appendChild(titulo);
+          diasSemana.forEach((dia) => {
+            const sd = document.createElement("div");
+            sd.className = "dia-semana";
+            sd.textContent = dia;
+            calendario.appendChild(sd);
+          });
+
+          const primerDia = new Date(year, month, 1).getDay() || 7;
+          for (let i = 1; i < primerDia; i++)
+            calendario.appendChild(document.createElement("div"));
+
+          const diasEnMes = new Date(year, month + 1, 0).getDate();
+          for (let d = 1; d <= diasEnMes; d++) {
+            const celda = document.createElement("div");
+            celda.className = "dia";
+            const numero = document.createElement("div");
+            numero.className = "numero";
+            numero.textContent = d;
+            const nota = document.createElement("div");
+            nota.className = "nota";
+            nota.textContent = "Cargando...";
+
+            celda.append(numero, nota);
+            calendario.appendChild(celda);
+
+            celda.addEventListener("click", () => {
+              mostrarModal(d, month, year);
+            });
+
+            try {
+              const docRef = doc(db, `notas${year}${month + 1}`, String(d));
+              const docSnap = await getDoc(docRef);
+              if (docSnap.exists()) {
+                const data = docSnap.data();
+                nota.textContent = data.nota || "";
+                if (data.imagenBase64) {
+                  const img = document.createElement("img");
+                  img.src = data.imagenBase64;
+                  img.alt = "Imagen del día";
+                  img.style.maxWidth = "100%";
+                  img.style.marginTop = "10px";
+                  celda.appendChild(img);
+                }
+              } else nota.textContent = "";
+            } catch (e) {
+              nota.textContent = "[Error]";
+              console.error(e);
+            }
+          }
+        }
+
+        calendarios.appendChild(calendario);
+      }
+
+      function mostrarModal(dia, mes, año) {
+        const modal = document.getElementById("myModal");
+        const modalFecha = document.getElementById("modalFecha");
+        const modalTexto = document.getElementById("modalTexto");
+        const modalImagen = document.getElementById("modalImagen");
+
+        modal.style.display = "block";
+        modalFecha.textContent = `${dia} ${meses[mes]} ${año}`;
+
+        // Limpiar contenido previo
+        modalTexto.textContent = "Cargando...";
+        modalImagen.innerHTML = "";
+
+        try {
+          const docRef = doc(db, `notas${año}${mes + 1}`, String(dia));
+          getDoc(docRef).then((docSnap) => {
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              modalTexto.textContent = data.nota || "";
+              if (data.imagenBase64) {
+                const img = document.createElement("img");
+                img.src = data.imagenBase64;
+                img.alt = "Imagen del día";
+                modalImagen.appendChild(img);
+              }
+            } else modalTexto.textContent = "";
+          });
+        } catch (e) {
+          modalTexto.textContent = "[Error]";
+          console.error(e);
+        }
+      }
+
+      document.getElementById("btn-anterior").addEventListener("click", () => {
+        if (esMovil()) {
+          currentWeekStartDate.setDate(currentWeekStartDate.getDate() - 7);
+          currentYear = currentWeekStartDate.getFullYear();
+          currentMonth = currentWeekStartDate.getMonth();
+
+          selectAnio.value = currentYear;
+          selectMes.value = currentMonth;
+
+          actualizarSemanas(currentYear, currentMonth);
+          // Selecciona la semana correspondiente
+          for (let i = 0; i < selectSemana.options.length; i++) {
+            const fecha = new Date(selectSemana.options[i].value);
+            const diff = Math.abs(fecha - currentWeekStartDate);
+            if (diff < 4 * 24 * 60 * 60 * 1000) {
+              selectSemana.selectedIndex = i;
+              break;
+            }
+          }
+        } else {
+          if (currentMonth === 0) {
+            currentMonth = 11;
+            currentYear--;
+          } else {
+            currentMonth--;
+          }
+          selectAnio.value = currentYear;
+          selectMes.value = currentMonth;
+        }
+
+        crearCalendario(currentYear, currentMonth);
+      });
+
+      document.getElementById("btn-siguiente").addEventListener("click", () => {
+        if (esMovil()) {
+          currentWeekStartDate.setDate(currentWeekStartDate.getDate() + 7);
+          currentYear = currentWeekStartDate.getFullYear();
+          currentMonth = currentWeekStartDate.getMonth();
+
+          selectAnio.value = currentYear;
+          selectMes.value = currentMonth;
+
+          actualizarSemanas(currentYear, currentMonth);
+          for (let i = 0; i < selectSemana.options.length; i++) {
+            const fecha = new Date(selectSemana.options[i].value);
+            const diff = Math.abs(fecha - currentWeekStartDate);
+            if (diff < 4 * 24 * 60 * 60 * 1000) {
+              selectSemana.selectedIndex = i;
+              break;
+            }
+          }
+        } else {
+          if (currentMonth === 11) {
+            currentMonth = 0;
+            currentYear++;
+          } else {
+            currentMonth++;
+          }
+          selectAnio.value = currentYear;
+          selectMes.value = currentMonth;
+        }
+
+        crearCalendario(currentYear, currentMonth);
+      });
+
+      crearCalendario(currentYear, currentMonth);
+    </script>
+
+    <script>
+      function toggleLoginForm() {
+        const form = document.getElementById("loginForm");
+        form.style.display = form.style.display === "block" ? "none" : "block";
+      }
+
+      function login() {
+        const user = document.getElementById("username").value.trim();
+        const pass = document.getElementById("password").value.trim();
+        if (user === "CaudielAdmin" && pass === "CaudielAdmin") {
+          sessionStorage.setItem("isLoggedIn", "true");
+          window.location.href = "admin.html";
+        } else {
+          alert("Credenciales incorrectas");
+        }
+      }
+
+      let paletaActual = 0;
+      const paletas = [
+        {
+          fondo: "#fce4ec",
+          texto: "#5d5d5d",
+          primario: "#d81b60",
+          primarioHover: "#f50057",
+          secundario: "#ffe3ee",
+          borde: "#f8bbd0",
+        },
+        {
+          fondo: "#e8f5e9",
+          texto: "#2e7d32",
+          primario: "#66bb6a",
+          primarioHover: "#43a047",
+          secundario: "#d0f0d0",
+          borde: "#a5d6a7",
+        },
+        {
+          fondo: "#e6f2ff",
+          texto: "#003366",
+          primario: "#4da6ff",
+          primarioHover: "#007acc",
+          secundario: "#cce6ff",
+          borde: "#99ccff",
+        },
+      ];
+
+      function siguientePaleta() {
+        paletaActual = (paletaActual + 1) % paletas.length;
+        cambiarPaleta(paletaActual);
+      }
+
+      function cambiarPaleta(index) {
+        paletaActual = index;
+        const p = paletas[index];
+
+        // Estilos generales
+        document.body.style.background = p.fondo;
+        document.body.style.color = p.texto;
+
+        document
+          .querySelectorAll("h1, .numero, .resumen-semanal, .calendario h2")
+          .forEach((el) => {
+            el.style.color = p.primario;
+          });
+
+        document
+          .querySelectorAll(
+            ".login-btn, .navegacion button, .login-form button, .close"
+          )
+          .forEach((el) => {
+            el.style.backgroundColor = p.primario;
+            el.style.color = "white";
+          });
+
+        document
+          .querySelectorAll(".calendario, .dia, .login-form, .resumen-semanal")
+          .forEach((el) => {
+            el.style.borderColor = p.borde;
+          });
+
+        document.querySelectorAll(".dia-semana").forEach((el) => {
+          el.style.backgroundColor = p.secundario;
+          el.style.borderBottomColor = p.borde;
+        });
+
+        document.querySelectorAll(".calendario").forEach((el) => {
+          el.style.backgroundColor = p.secundario;
+        });
+
+        document.querySelectorAll("select").forEach((el) => {
+          el.style.borderColor = p.borde;
+          el.style.color = p.texto;
+        });
+
+        // Mover y recolorear el cuadrado del switch
+        const indicador = document.getElementById("switch-indicador");
+        const posiciones = ["6px", "calc(50% - 14px)", "calc(100% - 34px)"];
+        indicador.style.left = posiciones[index];
+        indicador.style.backgroundColor = p.primario;
+        document.querySelector(".switch-wrapper").style.borderColor = p.borde;
+      }
+
+      // Inicializar paleta al cargar
+      window.addEventListener("DOMContentLoaded", () => cambiarPaleta(0));
+    </script>
+  </body>
+</html>

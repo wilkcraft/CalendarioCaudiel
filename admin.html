@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendario Caudiel 2025-2026</title>
+    <link rel="icon" href="caudielLogo.png" />
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background: #fce4ec;
+        padding: 20px;
+        margin: 0;
+        color: #5d5d5d;
+      }
+
+      header {
+        position: relative;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .logo-img {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        height: 80px;
+        width: auto;
+        pointer-events: none; /* hace que no se pueda clicar */
+        user-select: none; /* evita que se seleccione */
+      }
+
+      h1 {
+        text-align: center;
+        color: #d81b60;
+        font-size: 2.5em;
+        margin-bottom: 20px;
+      }
+
+      .dia-semana {
+        text-align: center;
+        font-weight: bold;
+        padding: 10px 0;
+        border-bottom: 1px solid #f8bbd0;
+        background-color: #ffe3ee;
+      }
+
+      .navegacion {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      .navegacion button {
+        padding: 12px 24px;
+        font-size: 1.2em;
+        cursor: pointer;
+        background-color: #ff80ab;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        transition: background-color 0.3s;
+        margin: 0 10px;
+      }
+
+      .navegacion button:hover {
+        background-color: #f50057;
+      }
+
+      .calendario-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      .calendario {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        width: 90%;
+        max-width: 1200px; /* Ajusta el ancho máximo */
+        margin: 10px;
+        background-color: #fff5f8;
+        border: 2px solid #f8bbd0;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+      }
+
+      .calendario h2 {
+        grid-column: span 7;
+        text-align: center;
+        margin: 0;
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #d81b60;
+      }
+
+      .calendario .dia {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 15px;
+        min-height: 100px;
+        border: 2px solid #f8bbd0;
+        border-radius: 8px;
+        background-color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .calendario .dia:hover {
+        background-color: #fce4ec;
+      }
+
+      .numero {
+        font-weight: bold;
+        font-size: 1.5em;
+        color: #d81b60;
+        margin-bottom: 5px;
+      }
+
+      .nota {
+        font-size: 1em;
+        color: #555;
+        text-align: center;
+        height: 40px;
+        overflow: hidden;
+        font-style: italic;
+      }
+
+      .nota.cargando {
+        color: #555;
+      }
+
+      .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #ffffff;
+        padding: 20px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        border-radius: 15px;
+        z-index: 10;
+        display: none;
+        max-width: 400px;
+        width: 90%;
+        box-sizing: border-box;
+      }
+
+      .popup h3 {
+        margin-bottom: 10px;
+        font-size: 1.5em;
+        color: #d81b60;
+        text-align: center;
+      }
+
+      .popup textarea {
+        width: 100%;
+        height: 100px;
+        padding: 10px;
+        font-size: 1em;
+        border: 1px solid #f8bbd0;
+        border-radius: 8px;
+        resize: none;
+      }
+
+      .popup button {
+        margin-top: 10px;
+        padding: 12px;
+        font-size: 1.2em;
+        background-color: #d81b60;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 100%;
+      }
+
+      .popup button:hover {
+        background-color: #f50057;
+      }
+
+      #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 5;
+        display: none;
+      }
+      .navegacion {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .navegacion button {
+        padding: 12px 24px;
+        font-size: 1.2em;
+        cursor: pointer;
+        background-color: #ff80ab;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        transition: background-color 0.3s;
+      }
+      .navegacion button:hover {
+        background-color: #f50057;
+      }
+      .navegacion select {
+        padding: 10px;
+        font-size: 1em;
+        border-radius: 10px;
+        border: 2px solid #f8bbd0;
+        margin: 0 5px;
+        background-color: white;
+      }
+      #input-imagen {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #f8bbd0;
+        border-radius: 12px;
+        background-color: #fff0f5;
+        cursor: pointer;
+      }
+
+      #btn-eliminar-imagen {
+        margin-top: 10px;
+        padding: 12px;
+        font-size: 1.2em;
+        background-color: #e53935;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 100%;
+      }
+
+      #btn-eliminar-imagen:hover {
+        background-color: #ff8a80;
+      }
+
+      .popup textarea,
+      #input-imagen {
+        box-sizing: border-box;
+      }
+
+      @media (max-width: 600px) {
+        .calendario {
+          display: flex !important;
+          flex-direction: column;
+        }
+
+        .dia-semana {
+          display: none; /* Ocultamos los encabezados de semana en móviles */
+        }
+
+        .calendario .dia {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 5px;
+          border: 1px solid #f8bbd0;
+          padding: 10px;
+          margin-bottom: 10px;
+        }
+
+        .calendario .dia .numero {
+          font-size: 1.2em;
+          margin-bottom: 0;
+          margin-right: 10px;
+        }
+
+        .nota {
+          text-align: left;
+          flex-grow: 1;
+        }
+
+        .nombre-dia {
+          font-weight: bold;
+          color: #d81b60;
+          font-size: 1.1em;
+          display: none;
+        }
+        .dia-semana {
+          display: none;
+        }
+        .calendario h2 {
+          font-size: 1.5em;
+          grid-column: span 1;
+        }
+
+        .dia img {
+          max-width: 100%;
+          margin-top: 8px;
+          border-radius: 8px;
+        }
+        .logo-img {
+          position: fixed;
+          top: 5px;
+          left: 5px;
+          height: 70px;
+          width: auto;
+          pointer-events: none;
+          user-select: none;
+        }
+      }
+      .switch-wrapper {
+        width: 100px;
+        height: 40px;
+        background-color: #fff;
+        border-radius: 10px;
+        margin: 15px auto 0;
+        position: relative;
+        cursor: pointer;
+        border: 2px solid #ccc;
+      }
+
+      #switch-indicador {
+        width: 28px;
+        height: 28px;
+        background-color: #d81b60;
+        border-radius: 6px;
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        transition: all 0.3s ease;
+      }
+      #input-imagen {
+        color: #5d5d5d;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img src="caudiel.png" alt="Caudiel Logo" class="logo-img" />
+      <h1>Calendario Caudiel 2025-2026</h1>
+      <div class="switch-wrapper" onclick="siguientePaleta()">
+        <div id="switch-indicador"></div>
+      </div>
+    </header>
+
+    <div class="navegacion">
+      <button id="btn-anterior">Anterior</button>
+      <button id="btn-siguiente">Siguiente</button>
+
+      <select id="select-mes">
+        <option value="0">Enero</option>
+        <option value="1">Febrero</option>
+        <option value="2">Marzo</option>
+        <option value="3">Abril</option>
+        <option value="4">Mayo</option>
+        <option value="5">Junio</option>
+        <option value="6">Julio</option>
+        <option value="7">Agosto</option>
+        <option value="8">Septiembre</option>
+        <option value="9">Octubre</option>
+        <option value="10">Noviembre</option>
+        <option value="11">Diciembre</option>
+      </select>
+
+      <select id="select-anio"></select>
+      <select id="select-semana" style="display: none"></select>
+    </div>
+
+    <div class="calendario-container" id="calendarios"></div>
+
+    <!-- Overlay y Popup -->
+    <div id="overlay"></div>
+    <div class="popup" id="popup">
+      <h3 id="titulo-dia">Día</h3>
+      <textarea id="input-nota" placeholder="Escribe una nota..."></textarea>
+      <button id="btn-guardar">Guardar</button>
+      <button class="popupButton">Cerrar</button>
+    </div>
+
+    <script type="module">
+      if (sessionStorage.getItem("isLoggedIn") !== "true") {
+        alert("Acceso no autorizado. Serás redirigido al inicio.");
+        window.location.href = "index.html";
+      }
+
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBp-39_WdV6uQ02mvMHu4ORLXFc96RTaOM",
+        authDomain: "calendariocaudiel.firebaseapp.com",
+        projectId: "calendariocaudiel",
+        storageBucket: "calendariocaudiel.appspot.com",
+        messagingSenderId: "780740498474",
+        appId: "1:780740498474:web:d741fd88bc94f926685f53",
+        measurementId: "G-PH31VFY827",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const calendarios = document.getElementById("calendarios");
+      const popup = document.getElementById("popup");
+      const overlay = document.getElementById("overlay");
+      const inputNota = document.getElementById("input-nota");
+      const tituloDia = document.getElementById("titulo-dia");
+      const btnGuardar = document.getElementById("btn-guardar");
+
+      const inputImagen = document.createElement("input");
+      inputImagen.type = "file";
+      inputImagen.accept = "image/*";
+      inputImagen.id = "input-imagen";
+      inputImagen.style.marginTop = "10px";
+      popup.insertBefore(inputImagen, btnGuardar);
+
+      // Crear botón de eliminar imagen
+      const btnEliminarImagen = document.createElement("button");
+      btnEliminarImagen.textContent = "Eliminar imagen";
+      btnEliminarImagen.id = "btn-eliminar-imagen";
+      btnEliminarImagen.style.marginTop = "10px";
+      popup.insertBefore(btnEliminarImagen, btnGuardar);
+
+      btnEliminarImagen.addEventListener("click", () => {
+        inputImagen.value = ""; // Limpiar el input de imagen
+      });
+
+      let diaSeleccionado = null;
+      const today = new Date();
+      let currentYear = today.getFullYear();
+      let currentMonth = today.getMonth();
+      const modoSemana = window.innerWidth <= 600;
+
+      const selectMes = document.getElementById("select-mes");
+      const selectAnio = document.getElementById("select-anio");
+      const selectSemana = document.getElementById("select-semana");
+
+      for (let y = 2024; y <= 2026; y++) {
+        const option = document.createElement("option");
+        option.value = y;
+        option.textContent = y;
+        selectAnio.appendChild(option);
+      }
+      let currentWeekStartDate = getStartOfWeek(new Date());
+      let fechaSemanaActual = new Date(currentWeekStartDate); // sincronizado desde el inicio
+
+      selectMes.value = currentMonth;
+      selectAnio.value = currentYear;
+
+      function esMovil() {
+        return window.innerWidth <= 600;
+      }
+
+      const meses = [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+      ];
+
+      function getStartOfWeek(date) {
+        const copia = new Date(date); // Evita modificar el original
+        const day = copia.getDay(); // Domingo: 0, Lunes: 1, ..., Sábado: 6
+        const diff = day === 0 ? -6 : 1 - day; // Para que empiece el lunes
+        copia.setDate(copia.getDate() + diff);
+        copia.setHours(0, 0, 0, 0); // Reinicia hora por si acaso
+        return copia;
+      }
+
+      function actualizarSemanas(year, month, seleccionarPrimera = false) {
+        selectSemana.innerHTML = "";
+
+        const primerDiaMes = new Date(year, month, 1);
+        let primerLunes = getStartOfWeek(primerDiaMes);
+
+        // Si el primer lunes cae en el mes anterior, avanzamos al siguiente lunes
+        if (primerLunes.getMonth() < month) {
+          primerLunes.setDate(primerLunes.getDate() + 7);
+        }
+
+        let semana = 1;
+        let fecha = new Date(primerLunes);
+
+        while (fecha.getMonth() === month) {
+          const opcion = document.createElement("option");
+          opcion.value = fecha.toISOString();
+          opcion.textContent = `Semana ${semana} (${fecha.getDate()} ${
+            meses[fecha.getMonth()]
+          })`;
+          selectSemana.appendChild(opcion);
+          semana++;
+          fecha.setDate(fecha.getDate() + 7); // avanzar una semana
+        }
+
+        if (seleccionarPrimera && selectSemana.options.length > 0) {
+          selectSemana.selectedIndex = 0;
+          currentWeekStartDate = new Date(selectSemana.value);
+        }
+      }
+
+      function seleccionarSemanaActual() {
+        const opciones = Array.from(selectSemana.options);
+        let mejorOpcion = 0;
+        let menorDiferencia = Infinity;
+
+        for (let i = 0; i < opciones.length; i++) {
+          const fechaOpcion = new Date(opciones[i].value);
+          const diferencia = Math.abs(fechaOpcion - currentWeekStartDate);
+          if (diferencia < menorDiferencia) {
+            menorDiferencia = diferencia;
+            mejorOpcion = i;
+          }
+        }
+
+        selectSemana.selectedIndex = mejorOpcion;
+      }
+
+      if (esMovil()) {
+        selectSemana.style.display = "inline-block";
+
+        // Obtener fecha de inicio de la semana actual real
+        const hoy = new Date();
+        currentWeekStartDate = getStartOfWeek(hoy);
+        fechaSemanaActual = new Date(currentWeekStartDate);
+
+        // Establecer el mes y año según la semana actual
+        currentYear = currentWeekStartDate.getFullYear();
+        currentMonth = currentWeekStartDate.getMonth();
+        selectMes.value = currentMonth;
+        selectAnio.value = currentYear;
+
+        // Actualiza el selector de semanas sin seleccionar automáticamente la primera
+        actualizarSemanas(currentYear, currentMonth, false);
+
+        // Seleccionar en el <select> la semana que más se aproxime a la actual
+        const opciones = Array.from(selectSemana.options);
+        let mejorOpcion = 0;
+        let menorDiferencia = Infinity;
+
+        for (let i = 0; i < opciones.length; i++) {
+          const fechaOpcion = new Date(opciones[i].value);
+          const diferencia = Math.abs(fechaOpcion - currentWeekStartDate);
+          if (diferencia < menorDiferencia) {
+            menorDiferencia = diferencia;
+            mejorOpcion = i;
+          }
+        }
+
+        selectSemana.selectedIndex = mejorOpcion;
+        currentWeekStartDate = new Date(selectSemana.value);
+        fechaSemanaActual = new Date(currentWeekStartDate);
+
+        // Evento para actualizar calendario al cambiar semana desde el select
+        selectSemana.addEventListener("change", () => {
+          const fechaSeleccionada = new Date(selectSemana.value);
+          if (!isNaN(fechaSeleccionada)) {
+            currentWeekStartDate = fechaSeleccionada;
+            fechaSemanaActual = new Date(currentWeekStartDate);
+            currentYear = currentWeekStartDate.getFullYear();
+            currentMonth = currentWeekStartDate.getMonth();
+            crearCalendario(currentYear, currentMonth);
+          }
+        });
+      }
+
+      selectMes.addEventListener("change", () => {
+        currentMonth = parseInt(selectMes.value);
+        actualizarSemanas(currentYear, currentMonth, true);
+
+        // Establece la fecha de la semana al inicio del mes
+        if (selectSemana.options.length > 0) {
+          selectSemana.selectedIndex = 0;
+          fechaSemanaActual = new Date(selectSemana.value);
+        }
+
+        crearCalendario(currentYear, currentMonth);
+      });
+
+      selectAnio.addEventListener("change", () => {
+        currentYear = parseInt(selectAnio.value);
+        actualizarSemanas(currentYear, currentMonth, true);
+
+        if (selectSemana.options.length > 0) {
+          selectSemana.selectedIndex = 0;
+          fechaSemanaActual = new Date(selectSemana.value);
+        }
+
+        crearCalendario(currentYear, currentMonth);
+      });
+
+      document.getElementById("btn-anterior").addEventListener("click", () => {
+        if (esMovil()) {
+          currentWeekStartDate.setDate(currentWeekStartDate.getDate() - 7);
+          fechaSemanaActual = new Date(currentWeekStartDate);
+          currentYear = currentWeekStartDate.getFullYear();
+          currentMonth = currentWeekStartDate.getMonth();
+
+          // Actualiza selects de mes y año
+          selectMes.value = currentMonth;
+          selectAnio.value = currentYear;
+
+          // Actualiza semanas y selecciona la actual
+          actualizarSemanas(currentYear, currentMonth, false);
+          seleccionarSemanaActual();
+        } else {
+          currentMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+          if (currentMonth === 11) currentYear--;
+          selectMes.value = currentMonth;
+          selectAnio.value = currentYear;
+        }
+
+        crearCalendario(currentYear, currentMonth);
+      });
+
+      document.getElementById("btn-siguiente").addEventListener("click", () => {
+        if (esMovil()) {
+          currentWeekStartDate.setDate(currentWeekStartDate.getDate() + 7);
+          fechaSemanaActual = new Date(currentWeekStartDate);
+          currentYear = currentWeekStartDate.getFullYear();
+          currentMonth = currentWeekStartDate.getMonth();
+
+          // Actualiza selects de mes y año
+          selectMes.value = currentMonth;
+          selectAnio.value = currentYear;
+
+          // Actualiza semanas y selecciona la actual
+          actualizarSemanas(currentYear, currentMonth, false);
+          seleccionarSemanaActual();
+        } else {
+          currentMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+          if (currentMonth === 0) currentYear++;
+          selectMes.value = currentMonth;
+          selectAnio.value = currentYear;
+        }
+
+        crearCalendario(currentYear, currentMonth);
+      });
+
+      if (modoSemana) {
+        const dia = fechaSemanaActual.getDay();
+        const offset = dia === 0 ? -6 : 1 - dia;
+        fechaSemanaActual.setDate(fechaSemanaActual.getDate() + offset);
+      }
+
+      const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+      function abrirPopup(dia, mes, anio, notaElemento) {
+        diaSeleccionado = dia;
+        tituloDia.textContent = `Día ${dia} de ${meses[mes]} de ${anio}`;
+        inputNota.value = notaElemento.textContent || "";
+        overlay.style.display = "block";
+        popup.style.display = "block";
+
+        popup.dataset.dia = dia;
+        popup.dataset.mes = mes;
+        popup.dataset.anio = anio;
+      }
+
+      btnGuardar.addEventListener("click", async () => {
+        const dia = popup.dataset.dia;
+        const mes = popup.dataset.mes;
+        const anio = popup.dataset.anio;
+        const nota = inputNota.value;
+
+        const nombreColeccion = `notas${anio}${parseInt(mes) + 1}`;
+        const docRef = doc(db, nombreColeccion, dia);
+        const data = { nota };
+
+        const archivo = inputImagen.files[0];
+
+        if (archivo) {
+          const reader = new FileReader();
+          reader.onloadend = async () => {
+            data.imagenBase64 = reader.result;
+            await setDoc(docRef, data);
+            cerrarPopupYActualizar(anio, mes);
+          };
+          reader.readAsDataURL(archivo);
+        } else {
+          await setDoc(docRef, data);
+          cerrarPopupYActualizar(anio, mes);
+        }
+      });
+
+      function cerrarPopupYActualizar(anio, mes) {
+        popup.style.display = "none";
+        overlay.style.display = "none";
+        crearCalendario(parseInt(anio), parseInt(mes));
+      }
+
+      async function crearCalendario(year, month) {
+        // Limpiar el contenedor de calendarios para evitar duplicados
+        calendarios.innerHTML = ""; // Asegúrate de eliminar el contenido viejo
+
+        const diasEnMes = new Date(year, month + 1, 0).getDate();
+        let primerDia = new Date(year, month, 1).getDay();
+        primerDia = primerDia === 0 ? 6 : primerDia - 1;
+
+        const calendario = document.createElement("div");
+        calendario.classList.add("calendario");
+
+        const titulo = document.createElement("h2");
+        titulo.textContent = `${meses[month]} ${year}`;
+        calendario.appendChild(titulo);
+
+        if (!modoSemana) {
+          diasSemana.forEach((d) => {
+            const celda = document.createElement("div");
+            celda.className = "dia-semana";
+            celda.textContent = d;
+            calendario.appendChild(celda);
+          });
+
+          for (let i = 0; i < primerDia; i++) {
+            calendario.appendChild(document.createElement("div"));
+          }
+        }
+
+        let diasParaMostrar = [];
+
+        if (modoSemana) {
+          const diasEnEstaSemana = [];
+          const startDate = new Date(fechaSemanaActual);
+
+          for (let i = 0; i < 7; i++) {
+            const date = new Date(startDate);
+            date.setDate(startDate.getDate() + i);
+            diasEnEstaSemana.push({
+              date,
+              dia: date.getDate(),
+              mes: date.getMonth(),
+              año: date.getFullYear(),
+            });
+          }
+
+          diasParaMostrar = diasEnEstaSemana;
+        } else {
+          for (let dia = 1; dia <= diasEnMes; dia++) {
+            diasParaMostrar.push({
+              dia,
+              mes: month,
+              año: year,
+              date: new Date(year, month, dia),
+            });
+          }
+        }
+
+        // Recorrer todos los días para crear las celdas
+        for (const { date, dia, mes, año } of diasParaMostrar) {
+          const celda = document.createElement("div");
+          celda.className = "dia";
+          celda.dataset.dia = dia;
+
+          if (modoSemana) {
+            const nombreDia = document.createElement("div");
+            nombreDia.className = "nombre-dia";
+            nombreDia.textContent =
+              diasSemana[date.getDay() === 0 ? 6 : date.getDay() - 1];
+            celda.appendChild(nombreDia);
+          }
+
+          const numero = document.createElement("div");
+          numero.className = "numero";
+          numero.textContent = dia;
+
+          const nota = document.createElement("div");
+          nota.className = "nota cargando";
+          nota.textContent = "Cargando...";
+
+          celda.appendChild(numero);
+          celda.appendChild(nota);
+
+          celda.addEventListener("click", () =>
+            abrirPopup(dia, mes, año, nota)
+          );
+          calendario.appendChild(celda);
+
+          try {
+            const nombreColeccion = `notas${año}${mes + 1}`;
+            const docRef = doc(db, nombreColeccion, String(dia));
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              nota.textContent = data.nota || "";
+
+              if (data.imagenBase64) {
+                const img = document.createElement("img");
+                img.src = data.imagenBase64;
+                img.alt = "Imagen del día";
+                img.style.maxWidth = "100%";
+                img.style.marginTop = "10px";
+                celda.appendChild(img);
+              }
+            } else {
+              nota.textContent = "";
+            }
+          } catch (error) {
+            nota.textContent = "[Error]";
+            console.error(error);
+          }
+        }
+
+        // Añadir el calendario generado al contenedor
+        calendarios.appendChild(calendario);
+      }
+
+      crearCalendario(currentYear, currentMonth);
+
+      // Cerrar popup al hacer clic en el botón "Cerrar"
+      document.querySelector(".popupButton").addEventListener("click", () => {
+        popup.style.display = "none";
+        overlay.style.display = "none";
+      });
+    </script>
+    <script>
+      let paletaActual = 0;
+      const paletas = [
+        {
+          fondo: "#fce4ec",
+          texto: "#5d5d5d",
+          primario: "#d81b60",
+          primarioHover: "#f50057",
+          secundario: "#ffe3ee",
+          borde: "#f8bbd0",
+        },
+        {
+          fondo: "#e8f5e9",
+          texto: "#2e7d32",
+          primario: "#66bb6a",
+          primarioHover: "#43a047",
+          secundario: "#d0f0d0",
+          borde: "#a5d6a7",
+        },
+        {
+          fondo: "#e6f2ff",
+          texto: "#003366",
+          primario: "#4da6ff",
+          primarioHover: "#007acc",
+          secundario: "#cce6ff",
+          borde: "#99ccff",
+        },
+      ];
+
+      function siguientePaleta() {
+        paletaActual = (paletaActual + 1) % paletas.length;
+        cambiarPaleta(paletaActual);
+      }
+
+      function cambiarPaleta(index) {
+        paletaActual = index;
+        const p = paletas[index];
+
+        // Estilos generales
+        document.body.style.background = p.fondo;
+        document.body.style.color = p.texto;
+
+        document
+          .querySelectorAll("h1, .numero, .resumen-semanal, .calendario h2")
+          .forEach((el) => {
+            el.style.color = p.primario;
+          });
+
+        document
+          .querySelectorAll(
+            ".login-btn, .navegacion button, .login-form button, .close"
+          )
+          .forEach((el) => {
+            el.style.backgroundColor = p.primario;
+            el.style.color = "white";
+          });
+
+        document
+          .querySelectorAll(".calendario, .dia, .login-form, .resumen-semanal")
+          .forEach((el) => {
+            el.style.borderColor = p.borde;
+          });
+
+        document.querySelectorAll(".dia-semana").forEach((el) => {
+          el.style.backgroundColor = p.secundario;
+          el.style.borderBottomColor = p.borde;
+        });
+
+        document.querySelectorAll(".calendario").forEach((el) => {
+          el.style.backgroundColor = p.secundario;
+        });
+
+        document.querySelectorAll("select").forEach((el) => {
+          el.style.borderColor = p.borde;
+          el.style.color = p.texto;
+        });
+
+        // Mover y recolorear el cuadrado del switch
+        const indicador = document.getElementById("switch-indicador");
+        const posiciones = ["6px", "calc(50% - 14px)", "calc(100% - 34px)"];
+        indicador.style.left = posiciones[index];
+        indicador.style.backgroundColor = p.primario;
+        document.querySelector(".switch-wrapper").style.borderColor = p.borde;
+
+        // Popup general
+        const popup = document.getElementById("popup");
+        popup.style.backgroundColor = "#fff"; // o puedes usar p.fondo si lo prefieres
+        popup.style.borderColor = p.borde;
+        popup.style.color = p.texto;
+
+        // Título del popup
+        document.querySelector("#popup h3").style.color = p.primario;
+
+        // Textarea
+        document.querySelector("#popup textarea").style.borderColor = p.borde;
+        document.querySelector("#popup textarea").style.backgroundColor =
+          "#fff0f5"; // puedes usar otro color claro
+        document.querySelector("#popup textarea").style.color = p.texto;
+
+        // Botones del popup
+        document.querySelectorAll("#popup button").forEach((btn) => {
+          btn.style.backgroundColor = p.primario;
+          btn.style.color = "white";
+        });
+
+        // Input de imagen
+        const inputImg = document.getElementById("input-imagen");
+        if (inputImg) {
+          inputImg.style.borderColor = p.borde;
+          inputImg.style.backgroundColor = "#fff0f5";
+        }
+
+        // Función para oscurecer el color
+        function oscurecerColor(hex, porcentaje) {
+          const num = parseInt(hex.replace("#", ""), 16);
+          let r = (num >> 16) - porcentaje;
+          let g = ((num >> 8) & 0x00ff) - porcentaje;
+          let b = (num & 0x0000ff) - porcentaje;
+
+          r = Math.max(0, r);
+          g = Math.max(0, g);
+          b = Math.max(0, b);
+
+          return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // Botón eliminar imagen
+        const btnEliminar = document.getElementById("btn-eliminar-imagen");
+        if (btnEliminar) {
+          const colorOscuro = oscurecerColor(p.primario, 40); // puedes probar con 30 o 50
+          btnEliminar.style.backgroundColor = colorOscuro;
+          btnEliminar.style.color = "white";
+        }
+      }
+
+      // Inicializar paleta al cargar
+      window.addEventListener("DOMContentLoaded", () => cambiarPaleta(0));
+    </script>
+  </body>
+</html>
