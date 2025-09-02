@@ -342,9 +342,10 @@
         width: 50px;
         height: 50px;
         background-color: #d81b60;
-        color: white;
-        font-size: 30px;
-        font-weight: bold;
+        background-image: url("reset.png");
+        background-size: 60%; /* Ajusta tamaño */
+        background-repeat: no-repeat;
+        background-position: center;
         border: none;
         border-radius: 50%;
         cursor: pointer;
@@ -366,11 +367,8 @@
           height: 40px;
           font-size: 30px;
         }
-
         #imagePreviewModal .reset-btn {
-          width: 40px;
-          height: 40px;
-          font-size: 20px;
+          display: none;
         }
         .calendario {
           grid-template-columns: 1fr;
@@ -531,7 +529,7 @@
 
     <!-- Previsualizador de imagen -->
     <div id="imagePreviewModal" class="modal">
-      <button class="reset-btn" title="Restaurar imagen">⭯</button>
+      <button class="reset-btn" title="Restaurar imagen"></button>
       <span class="close">&times;</span>
       <img class="modal-image" src="" alt="Previsualización" />
     </div>
@@ -1113,6 +1111,14 @@
       // --- BOTÓN DE RESET ---
       const resetBtn = imageModal.querySelector(".reset-btn");
 
+      function resetImageModal() {
+        scale = 1;
+        imageModalImg.style.transform = `scale(${scale})`;
+        imageModalImg.style.position = "relative";
+        imageModalImg.style.left = "0px";
+        imageModalImg.style.top = "0px";
+      }
+
       resetBtn.addEventListener("click", () => {
         scale = 1;
         imageModalImg.style.transform = `scale(${scale})`;
@@ -1153,12 +1159,14 @@
       imageModalClose.addEventListener("click", () => {
         imageModal.style.display = "none";
         imageModalImg.src = "";
+        resetImageModal();
       });
 
       imageModal.addEventListener("click", (e) => {
         if (e.target === imageModal) {
           imageModal.style.display = "none";
           imageModalImg.src = "";
+          resetImageModal();
         }
       });
 
@@ -1167,6 +1175,7 @@
       modalImagen.addEventListener("click", (e) => {
         if (e.target.tagName === "IMG") {
           imageModalImg.src = e.target.src;
+          resetImageModal();
           imageModal.style.display = "flex";
         }
       });
