@@ -220,24 +220,29 @@
       }
 
       .modal-content img {
-        max-width: 100%;
+        max-height: 150px; /* Alto máximo deseado */
+        width: auto; /* El ancho se ajusta proporcionalmente */
         margin-top: 10px;
         border-radius: 8px;
         display: block;
         margin-left: auto;
         margin-right: auto;
+        cursor: pointer; /* Para indicar que se puede hacer clic */
       }
 
       .close {
-        padding: 1px 8px;
-        font-size: 1.2em;
+        width: 40px; /* tamaño fijo */
+        height: 40px; /* mismo que width */
+        line-height: 40px; /* para centrar la X verticalmente */
+        text-align: center; /* centrar la X horizontalmente */
+        font-size: 30px;
         background-color: #ff80ab;
         color: white;
         float: right;
-        font-size: 28px;
         font-weight: bold;
         border: none;
-        border-radius: 50%;
+        border-radius: 50%; /* círculo perfecto */
+        cursor: pointer;
         transition: background-color 0.3s;
       }
 
@@ -256,8 +261,117 @@
         margin: 0 5px;
         background-color: white;
       }
+      .switch-wrapper {
+        width: 100px;
+        height: 40px;
+        background-color: #fff;
+        border-radius: 10px;
+        margin: 15px auto 0;
+        position: relative;
+        cursor: pointer;
+        border: 2px solid #ccc;
+      }
+
+      #switch-indicador {
+        width: 28px;
+        height: 28px;
+        background-color: #d81b60;
+        border-radius: 6px;
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        transition: all 0.3s ease;
+      }
+
+      #imagePreviewModal {
+        display: none; /* Oculto por defecto */
+        position: fixed;
+        z-index: 99999999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+
+        /* Flex para centrar contenido */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        /* Quitar padding que rompe el centrado vertical */
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      #imagePreviewModal .modal-image {
+        max-width: 90vw;
+        max-height: 90vh;
+        width: auto;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        object-fit: contain;
+        display: block;
+        margin: 0; /* centrado por flex */
+      }
+
+      #imagePreviewModal .close {
+        position: fixed;
+        top: 20px;
+        right: 30px;
+        width: 50px; /* Ancho fijo */
+        height: 50px; /* Alto fijo igual al ancho */
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        font-size: 40px;
+        font-weight: bold;
+        border: none;
+        border-radius: 50%; /* Hace que sea circular */
+        display: flex; /* Centrar el contenido */
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1001;
+        transition: background-color 0.3s;
+      }
+
+      #imagePreviewModal .reset-btn {
+        position: fixed;
+        top: 20px;
+        left: 30px;
+        width: 50px;
+        height: 50px;
+        background-color: #d81b60;
+        color: white;
+        font-size: 30px;
+        font-weight: bold;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 1001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s;
+      }
+      #imagePreviewModal .reset-btn:hover {
+        background-color: #f50057;
+        text-decoration: none;
+        cursor: pointer;
+      }
 
       @media (max-width: 600px) {
+        #imagePreviewModal .close {
+          width: 40px;
+          height: 40px;
+          font-size: 30px;
+        }
+
+        #imagePreviewModal .reset-btn {
+          width: 40px;
+          height: 40px;
+          font-size: 20px;
+        }
         .calendario {
           grid-template-columns: 1fr;
         }
@@ -342,30 +456,17 @@
           }
         }
       }
-      .switch-wrapper {
-        width: 100px;
-        height: 40px;
-        background-color: #fff;
-        border-radius: 10px;
-        margin: 15px auto 0;
-        position: relative;
-        cursor: pointer;
-        border: 2px solid #ccc;
-      }
-
-      #switch-indicador {
-        width: 28px;
-        height: 28px;
-        background-color: #d81b60;
-        border-radius: 6px;
-        position: absolute;
-        top: 6px;
-        left: 6px;
-        transition: all 0.3s ease;
-      }
     </style>
   </head>
   <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Asegurarse de que el previsualizador esté cerrado al cargar
+      const imageModal = document.getElementById("imagePreviewModal");
+      const imageModalImg = imageModal.querySelector(".modal-image");
+      imageModal.style.display = "none";
+      imageModalImg.src = "";
+    });
+
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("service-worker.js")
@@ -426,6 +527,13 @@
         <p id="modalTexto"></p>
         <div id="modalImagen"></div>
       </div>
+    </div>
+
+    <!-- Previsualizador de imagen -->
+    <div id="imagePreviewModal" class="modal">
+      <button class="reset-btn" title="Restaurar imagen">⭯</button>
+      <span class="close">&times;</span>
+      <img class="modal-image" src="" alt="Previsualización" />
     </div>
 
     <script type="module">
@@ -994,6 +1102,72 @@
           if (username !== "" || password !== "") {
             login();
           }
+        }
+      });
+
+      // --- Previsualizador de imágenes ---
+      const imageModal = document.getElementById("imagePreviewModal");
+      const imageModalImg = imageModal.querySelector(".modal-image");
+      const imageModalClose = imageModal.querySelector(".close");
+
+      // --- BOTÓN DE RESET ---
+      const resetBtn = imageModal.querySelector(".reset-btn");
+
+      resetBtn.addEventListener("click", () => {
+        scale = 1;
+        imageModalImg.style.transform = `scale(${scale})`;
+        imageModalImg.style.position = "relative";
+        imageModalImg.style.left = "0px";
+        imageModalImg.style.top = "0px";
+      });
+
+      // --- Zoom y arrastre ---
+      let scale = 1;
+      let isDragging = false;
+      let startX, startY;
+
+      imageModalImg.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        scale += e.deltaY * -0.001;
+        scale = Math.min(Math.max(0.5, scale), 3);
+        imageModalImg.style.transform = `scale(${scale})`;
+      });
+
+      imageModalImg.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        startX = e.clientX - imageModalImg.offsetLeft;
+        startY = e.clientY - imageModalImg.offsetTop;
+      });
+
+      imageModalImg.addEventListener("mouseup", () => (isDragging = false));
+      imageModalImg.addEventListener("mouseleave", () => (isDragging = false));
+      imageModalImg.addEventListener("mousemove", (e) => {
+        if (isDragging) {
+          e.preventDefault();
+          imageModalImg.style.position = "relative";
+          imageModalImg.style.left = `${e.clientX - startX}px`;
+          imageModalImg.style.top = `${e.clientY - startY}px`;
+        }
+      });
+
+      imageModalClose.addEventListener("click", () => {
+        imageModal.style.display = "none";
+        imageModalImg.src = "";
+      });
+
+      imageModal.addEventListener("click", (e) => {
+        if (e.target === imageModal) {
+          imageModal.style.display = "none";
+          imageModalImg.src = "";
+        }
+      });
+
+      // Detectar clics en imágenes del modal principal
+      const modalImagen = document.getElementById("modalImagen");
+      modalImagen.addEventListener("click", (e) => {
+        if (e.target.tagName === "IMG") {
+          imageModalImg.src = e.target.src;
+          imageModal.style.display = "flex";
         }
       });
     </script>
