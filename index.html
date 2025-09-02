@@ -703,6 +703,7 @@
         }
 
         calendarios.appendChild(calendario);
+        cambiarPaleta(paletaActual);
       }
 
       function mostrarModal(dia, mes, año) {
@@ -832,22 +833,25 @@
           primarioHover: "#f50057",
           secundario: "#ffe3ee",
           borde: "#f8bbd0",
+          fondoSemanal: "#ffebf0",
         },
         {
           fondo: "#e8f5e9",
           texto: "#2e7d32",
-          primario: "#66bb6a",
+          primario: "#388e3c",
           primarioHover: "#43a047",
           secundario: "#d0f0d0",
           borde: "#a5d6a7",
+          fondoSemanal: "#e0f7e9",
         },
         {
           fondo: "#e6f2ff",
           texto: "#003366",
-          primario: "#4da6ff",
+          primario: "#005bb5",
           primarioHover: "#007acc",
           secundario: "#cce6ff",
           borde: "#99ccff",
+          fondoSemanal: "#d9ecff",
         },
       ];
 
@@ -905,6 +909,31 @@
         indicador.style.left = posiciones[index];
         indicador.style.backgroundColor = p.primario;
         document.querySelector(".switch-wrapper").style.borderColor = p.borde;
+
+        document.querySelectorAll(".resumen-semanal").forEach((el) => {
+          el.style.backgroundColor = p.fondoSemanal;
+        });
+
+        // Cambiar color del signo "!" según paleta
+        const colorAlertas = ["#ff0033", "#2e7d32", "#005bb5"];
+        document.querySelectorAll(".alerta").forEach((el) => {
+          el.style.color = colorAlertas[index];
+          el.style.textShadow = `1px 1px 2px #fff, 0 0 5px ${colorAlertas[index]}`;
+        });
+
+        document
+          .querySelectorAll(
+            ".login-btn, .navegacion button, .login-form button, .close"
+          )
+          .forEach((el) => {
+            el.style.backgroundColor = p.primario;
+            el.style.color = "white";
+
+            // Hover dinámico
+            el.onmouseenter = () =>
+              (el.style.backgroundColor = p.primarioHover);
+            el.onmouseleave = () => (el.style.backgroundColor = p.primario);
+          });
       }
 
       // Inicializar paleta al cargar
