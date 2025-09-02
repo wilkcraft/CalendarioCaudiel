@@ -316,6 +316,50 @@
           pointer-events: none;
           user-select: none;
         }
+        .resumen-semanal {
+          display: flex;
+          justify-content: space-between;
+          background-color: #ffebf0;
+          padding: 10px;
+          margin-bottom: 10px;
+          border: 2px solid #f8bbd0;
+          border-radius: 10px;
+          font-weight: bold;
+          font-size: 0.9em;
+          color: #d81b60;
+        }
+        .resumen-dia {
+          flex: 1;
+          text-align: center;
+          cursor: pointer;
+        }
+        .resumen-dia .alerta {
+          display: inline-block;
+          margin-left: 5px;
+          font-size: 2em;
+          font-weight: bold;
+          color: #ff0033;
+          animation: parpadeo 1s infinite, rebote 1.5s infinite;
+          text-shadow: 1px 1px 2px #fff, 0 0 5px #ff0033;
+        }
+        @keyframes parpadeo {
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0;
+          }
+        }
+        @keyframes rebote {
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-3px);
+          }
+        }
       }
       .switch-wrapper {
         width: 100px;
@@ -494,15 +538,14 @@
         const primerDiaMes = new Date(year, month, 1);
         let primerLunes = getStartOfWeek(primerDiaMes);
 
-        // Si el primer lunes cae en el mes anterior, avanzamos al siguiente lunes
-        if (primerLunes.getMonth() < month) {
-          primerLunes.setDate(primerLunes.getDate() + 7);
-        }
-
         let semana = 1;
         let fecha = new Date(primerLunes);
 
-        while (fecha.getMonth() === month) {
+        while (
+          fecha.getMonth() === month ||
+          (fecha < primerDiaMes && fecha.getMonth() === month - 1) ||
+          (month === 0 && fecha.getMonth() === 11)
+        ) {
           const opcion = document.createElement("option");
           opcion.value = fecha.toISOString();
           opcion.textContent = `Semana ${semana} (${fecha.getDate()} ${
@@ -510,7 +553,7 @@
           })`;
           selectSemana.appendChild(opcion);
           semana++;
-          fecha.setDate(fecha.getDate() + 7); // avanzar una semana
+          fecha.setDate(fecha.getDate() + 7);
         }
 
         if (seleccionarPrimera && selectSemana.options.length > 0) {
@@ -720,11 +763,11 @@
         const calendario = document.createElement("div");
         calendario.classList.add("calendario");
 
-        const titulo = document.createElement("h2");
-        titulo.textContent = `${meses[month]} ${year}`;
-        calendario.appendChild(titulo);
-
         if (!modoSemana) {
+          const titulo = document.createElement("h2");
+          titulo.textContent = `${meses[month]} ${year}`;
+          calendario.appendChild(titulo);
+
           diasSemana.forEach((d) => {
             const celda = document.createElement("div");
             celda.className = "dia-semana";
@@ -740,21 +783,91 @@
         let diasParaMostrar = [];
 
         if (modoSemana) {
-          const diasEnEstaSemana = [];
-          const startDate = new Date(fechaSemanaActual);
+          const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
+          // Título del mes
+          const titulo = document.createElement("h2");
+          titulo.textContent = `${
+            meses[fechaSemanaActual.getMonth()]
+          } ${fechaSemanaActual.getFullYear()}`;
+          calendario.appendChild(titulo);
+
+          // Bloque resumen semanal
+          const resumen = document.createElement("div");
+          resumen.className = "resumen-semanal";
+          const resumenHandlers = [];
           for (let i = 0; i < 7; i++) {
-            const date = new Date(startDate);
-            date.setDate(startDate.getDate() + i);
-            diasEnEstaSemana.push({
-              date,
-              dia: date.getDate(),
-              mes: date.getMonth(),
-              año: date.getFullYear(),
-            });
+            const label = document.createElement("div");
+            label.className = "resumen-dia";
+            label.textContent = diasSemana[i];
+            resumen.appendChild(label);
+            resumenHandlers.push(label);
           }
+          calendario.appendChild(resumen);
 
-          diasParaMostrar = diasEnEstaSemana;
+          // Luego tu bucle que crea cada día de la semana…
+          for (let i = 0; i < 7; i++) {
+            const date = new Date(fechaSemanaActual);
+            date.setDate(fechaSemanaActual.getDate() + i);
+            const dia = date.getDate();
+            const mes = date.getMonth();
+            const año = date.getFullYear();
+
+            const celda = document.createElement("div");
+            celda.className = "dia";
+            celda.dataset.dia = dia;
+
+            const numero = document.createElement("div");
+            numero.className = "numero";
+            numero.textContent = dia;
+
+            const nota = document.createElement("div");
+            nota.className = "nota cargando";
+            nota.textContent = "Cargando...";
+
+            celda.appendChild(numero);
+            celda.appendChild(nota);
+            calendario.appendChild(celda);
+
+            celda.addEventListener("click", () =>
+              abrirPopup(dia, mes, año, nota)
+            );
+
+            try {
+              const nombreColeccion = `notas${año}${mes + 1}`;
+              const docRef = doc(db, nombreColeccion, String(dia));
+              const docSnap = await getDoc(docRef);
+              if (docSnap.exists()) {
+                const data = docSnap.data();
+                nota.textContent = data.nota || "";
+                if (data.imagenBase64) {
+                  const img = document.createElement("img");
+                  img.src = data.imagenBase64;
+                  img.alt = "Imagen del día";
+                  img.style.maxWidth = "100%";
+                  img.style.marginTop = "10px";
+                  celda.appendChild(img);
+                }
+                if (
+                  (data.nota && data.nota.trim() !== "") ||
+                  data.imagenBase64
+                ) {
+                  const alerta = document.createElement("span");
+                  alerta.textContent = "!";
+                  alerta.className = "alerta";
+                  resumenHandlers[i].appendChild(alerta);
+                  resumenHandlers[i].addEventListener("click", () => {
+                    abrirPopup(dia, mes, año, nota);
+                  });
+                }
+              } else {
+                nota.textContent = "";
+              }
+            } catch (e) {
+              nota.textContent = "[Error]";
+              console.error(e);
+            }
+          }
         } else {
           for (let dia = 1; dia <= diasEnMes; dia++) {
             diasParaMostrar.push({
@@ -823,6 +936,7 @@
 
         // Añadir el calendario generado al contenedor
         calendarios.appendChild(calendario);
+        cambiarPaleta(paletaActual);
       }
 
       crearCalendario(currentYear, currentMonth);
@@ -843,22 +957,25 @@
           primarioHover: "#f50057",
           secundario: "#ffe3ee",
           borde: "#f8bbd0",
+          fondoSemanal: "#ffebf0",
         },
         {
           fondo: "#e8f5e9",
           texto: "#2e7d32",
-          primario: "#66bb6a",
+          primario: "#388e3c",
           primarioHover: "#43a047",
           secundario: "#d0f0d0",
           borde: "#a5d6a7",
+          fondoSemanal: "#e0f7e9",
         },
         {
           fondo: "#e6f2ff",
           texto: "#003366",
-          primario: "#4da6ff",
+          primario: "#005bb5",
           primarioHover: "#007acc",
           secundario: "#cce6ff",
           borde: "#99ccff",
+          fondoSemanal: "#d9ecff",
         },
       ];
 
@@ -966,6 +1083,31 @@
           btnEliminar.style.backgroundColor = colorOscuro;
           btnEliminar.style.color = "white";
         }
+
+        document
+          .querySelectorAll(
+            ".login-btn, .navegacion button, .login-form button, .close"
+          )
+          .forEach((el) => {
+            el.style.backgroundColor = p.primario;
+            el.style.color = "white";
+
+            // Hover dinámico
+            el.onmouseenter = () =>
+              (el.style.backgroundColor = p.primarioHover);
+            el.onmouseleave = () => (el.style.backgroundColor = p.primario);
+          });
+
+        document.querySelectorAll(".resumen-semanal").forEach((el) => {
+          el.style.backgroundColor = p.fondoSemanal;
+        });
+
+        // Cambiar color del signo "!" según paleta
+        const colorAlertas = ["#ff0033", "#2e7d32", "#005bb5"];
+        document.querySelectorAll(".alerta").forEach((el) => {
+          el.style.color = colorAlertas[index];
+          el.style.textShadow = `1px 1px 2px #fff, 0 0 5px ${colorAlertas[index]}`;
+        });
       }
 
       // Inicializar paleta al cargar
