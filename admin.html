@@ -946,6 +946,17 @@
         popup.style.display = "none";
         overlay.style.display = "none";
       });
+
+      // Cerrar popup al hacer clic fuera de él
+      overlay.addEventListener("click", () => {
+        popup.style.display = "none";
+        overlay.style.display = "none";
+      });
+
+      // Evitar que al hacer clic dentro del popup se cierre
+      popup.addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
     </script>
     <script>
       let paletaActual = 0;
