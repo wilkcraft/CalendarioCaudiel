@@ -82,6 +82,18 @@
         display: none;
         z-index: 100;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+
+      .login-form.show {
+        opacity: 1;
+        pointer-events: auto;
       }
 
       .login-form input,
@@ -89,7 +101,7 @@
         display: block;
         margin-bottom: 10px;
         padding: 10px;
-        width: 200px;
+        width: 80%;
         font-size: 1em;
         border-radius: 5px;
       }
@@ -810,7 +822,7 @@
     <script>
       function toggleLoginForm() {
         const form = document.getElementById("loginForm");
-        form.style.display = form.style.display === "block" ? "none" : "block";
+        form.classList.toggle("show");
       }
 
       function login() {
@@ -938,6 +950,52 @@
 
       // Inicializar paleta al cargar
       window.addEventListener("DOMContentLoaded", () => cambiarPaleta(0));
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const modal = document.getElementById("myModal");
+        const closeBtn = document.querySelector(".close");
+
+        // Cerrar al hacer clic en la X
+        closeBtn.addEventListener("click", () => {
+          modal.style.display = "none";
+        });
+
+        // Cerrar al hacer clic fuera del contenido
+        modal.addEventListener("click", (event) => {
+          if (event.target === modal) {
+            modal.style.display = "none";
+          }
+        });
+      });
+
+      // Detecta clics fuera del login-form
+      document.addEventListener("click", function (event) {
+        const loginForm = document.getElementById("loginForm");
+        const loginBtn = document.querySelector(".login-btn");
+
+        // Si el login está abierto y el clic NO fue dentro del form ni en el botón
+        if (
+          loginForm.classList.contains("show") &&
+          !loginForm.contains(event.target) &&
+          event.target !== loginBtn
+        ) {
+          loginForm.classList.remove("show");
+        }
+      });
+
+      // Ejecutar login al pulsar Enter si el login está abierto
+      document.addEventListener("keydown", function (event) {
+        const loginForm = document.getElementById("loginForm");
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (loginForm.classList.contains("show") && event.key === "Enter") {
+          // Solo iniciar sesión si hay algo en los inputs
+          if (username !== "" || password !== "") {
+            login();
+          }
+        }
+      });
     </script>
   </body>
 </html>
