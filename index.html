@@ -167,6 +167,20 @@
         color: #d81b60;
       }
 
+      .calendario .dia {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 15px;
+        height: 180px; /* 🔥 altura fija para todos los días */
+        border: 2px solid #f8bbd0;
+        border-radius: 8px;
+        background-color: #fff;
+        cursor: pointer;
+        overflow: hidden; /* evita que crezca más de la altura fija */
+      }
+
       .dia {
         display: flex;
         flex-direction: column;
@@ -190,9 +204,18 @@
         font-size: 1em;
         color: #555;
         text-align: center;
-        height: 40px;
-        overflow: hidden;
+        max-height: 60px; /* 🔥 altura máxima fija */
+        overflow-y: auto; /* 🔥 scroll vertical si hay mucho texto */
         font-style: italic;
+        width: 100%; /* se asegura de ocupar el ancho del día */
+        box-sizing: border-box;
+        padding: 2px;
+      }
+
+      #modalTexto {
+        max-height: 120px; /* 🔥 límite de altura */
+        overflow-y: auto; /* 🔥 scroll si el texto es muy largo */
+        margin-bottom: 10px; /* separa del bloque de imágenes */
       }
 
       /* Pop-up (modal) */
@@ -361,6 +384,24 @@
         cursor: pointer;
       }
 
+      .imagenes-container {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        max-width: 100%;
+        max-height: 80px; /* 🔥 controla altura máxima dentro del día */
+        padding: 5px 0;
+        scroll-snap-type: x mandatory;
+      }
+
+      .imagenes-container img {
+        height: 80px; /* 🔥 fija altura de cada imagen */
+        width: auto;
+        border-radius: 6px;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+      }
+
       @media (max-width: 600px) {
         #imagePreviewModal .close {
           width: 40px;
@@ -372,6 +413,15 @@
         }
         .calendario {
           grid-template-columns: 1fr;
+        }
+        .calendario .dia {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 5px;
+          border: 1px solid #f8bbd0;
+          padding: 10px;
+          margin-bottom: 10px;
         }
         .nota {
           text-align: left;
@@ -740,12 +790,30 @@
               if (docSnap.exists()) {
                 const data = docSnap.data();
                 nota.textContent = data.nota || "";
-                if (data.imagenBase64) {
+                if (data.imagenesBase64 && Array.isArray(data.imagenesBase64)) {
+                  const contenedor = document.createElement("div");
+                  contenedor.className = "imagenes-container";
+
+                  data.imagenesBase64.forEach((src) => {
+                    const img = document.createElement("img");
+                    img.src = src;
+                    img.alt = "Imagen del día";
+                    contenedor.appendChild(img);
+                  });
+
+                  celda.appendChild(contenedor);
+                } else if (data.imagenBase64) {
+                  const contenedor = document.createElement("div");
+                  contenedor.className = "imagenes-container";
+
                   const img = document.createElement("img");
                   img.src = data.imagenBase64;
                   img.alt = "Imagen del día";
-                  celda.appendChild(img);
+                  contenedor.appendChild(img);
+
+                  celda.appendChild(contenedor);
                 }
+
                 if (
                   (data.nota && data.nota.trim() !== "") ||
                   data.imagenBase64
@@ -804,13 +872,28 @@
               if (docSnap.exists()) {
                 const data = docSnap.data();
                 nota.textContent = data.nota || "";
-                if (data.imagenBase64) {
+                if (data.imagenesBase64 && Array.isArray(data.imagenesBase64)) {
+                  const contenedor = document.createElement("div");
+                  contenedor.className = "imagenes-container";
+
+                  data.imagenesBase64.forEach((src) => {
+                    const img = document.createElement("img");
+                    img.src = src;
+                    img.alt = "Imagen del día";
+                    contenedor.appendChild(img);
+                  });
+
+                  celda.appendChild(contenedor);
+                } else if (data.imagenBase64) {
+                  const contenedor = document.createElement("div");
+                  contenedor.className = "imagenes-container";
+
                   const img = document.createElement("img");
                   img.src = data.imagenBase64;
                   img.alt = "Imagen del día";
-                  img.style.maxWidth = "100%";
-                  img.style.marginTop = "10px";
-                  celda.appendChild(img);
+                  contenedor.appendChild(img);
+
+                  celda.appendChild(contenedor);
                 }
               } else nota.textContent = "";
             } catch (e) {
@@ -843,11 +926,28 @@
             if (docSnap.exists()) {
               const data = docSnap.data();
               modalTexto.textContent = data.nota || "";
-              if (data.imagenBase64) {
+              if (data.imagenesBase64 && Array.isArray(data.imagenesBase64)) {
+                const contenedor = document.createElement("div");
+                contenedor.className = "imagenes-container";
+
+                data.imagenesBase64.forEach((src) => {
+                  const img = document.createElement("img");
+                  img.src = src;
+                  img.alt = "Imagen del día";
+                  contenedor.appendChild(img);
+                });
+
+                modalImagen.appendChild(contenedor); // ✅ ahora va al popup
+              } else if (data.imagenBase64) {
+                const contenedor = document.createElement("div");
+                contenedor.className = "imagenes-container";
+
                 const img = document.createElement("img");
                 img.src = data.imagenBase64;
                 img.alt = "Imagen del día";
-                modalImagen.appendChild(img);
+                contenedor.appendChild(img);
+
+                modalImagen.appendChild(contenedor); // ✅ al popup
               }
             } else modalTexto.textContent = "";
           });
