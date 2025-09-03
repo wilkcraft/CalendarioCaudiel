@@ -105,16 +105,12 @@
         justify-content: flex-start;
         align-items: center;
         padding: 15px;
-        min-height: 100px;
+        height: 180px; /* 🔥 altura fija para todos los días */
         border: 2px solid #f8bbd0;
         border-radius: 8px;
         background-color: #fff;
         cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-
-      .calendario .dia:hover {
-        background-color: #fce4ec;
+        overflow: hidden; /* evita que crezca más de la altura fija */
       }
 
       .numero {
@@ -128,9 +124,12 @@
         font-size: 1em;
         color: #555;
         text-align: center;
-        height: 40px;
-        overflow: hidden;
+        max-height: 60px; /* 🔥 altura máxima fija */
+        overflow-y: auto; /* 🔥 scroll vertical si hay mucho texto */
         font-style: italic;
+        width: 100%; /* se asegura de ocupar el ancho del día */
+        box-sizing: border-box;
+        padding: 2px;
       }
 
       .nota.cargando {
@@ -225,36 +224,96 @@
         margin: 0 5px;
         background-color: white;
       }
+
+      /* Ocultamos el input original */
       #input-imagen {
-        display: block;
-        width: 100%;
-        padding: 10px;
-        border: 2px solid #f8bbd0;
-        border-radius: 12px;
-        background-color: #fff0f5;
-        cursor: pointer;
+        display: none;
       }
 
-      #btn-eliminar-imagen {
+      /* Estilizamos el botón personalizado */
+      #btn-examinar {
         margin-top: 10px;
-        padding: 12px;
+        display: inline-block;
         font-size: 1.2em;
-        background-color: #e53935;
+        background-color: #d81b60;
         color: white;
         border: none;
         border-radius: 12px;
         cursor: pointer;
+        font-weight: bold;
         transition: background-color 0.3s;
-        width: 100%;
+        display: block; /* Necesario para que margin:auto funcione */
+        width: 75%;
+        margin: 10px auto 0 auto;
       }
 
-      #btn-eliminar-imagen:hover {
-        background-color: #ff8a80;
+      #btn-examinar:hover {
+        background-color: #f50057;
       }
 
       .popup textarea,
       #input-imagen {
         box-sizing: border-box;
+      }
+
+      .imagenes-container {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        max-width: 100%;
+        max-height: 80px; /* 🔥 controla altura máxima dentro del día */
+        padding: 5px 0;
+        scroll-snap-type: x mandatory;
+      }
+
+      .imagenes-container img {
+        height: 80px; /* 🔥 fija altura de cada imagen */
+        width: auto;
+        border-radius: 6px;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+      }
+
+      .preview-imagenes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+        max-height: 100px; /* 🔥 evita que crezca demasiado */
+        overflow-y: auto; /* 🔥 scroll si hay muchas */
+      }
+
+      .preview-item {
+        position: relative;
+        display: inline-block;
+      }
+
+      .preview-item img {
+        height: 70px;
+        width: auto;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+      }
+
+      .preview-item .eliminar-img {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 26px;
+        height: 26px;
+        border: none;
+        cursor: pointer;
+        border-radius: 30%;
+        display: flex;
+        align-items: center;
+        justify-content: center; /* 🔥 centra el contenido */
+        padding: 0;
+      }
+
+      .preview-item .eliminar-img img {
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
       }
 
       @media (max-width: 600px) {
@@ -426,11 +485,15 @@
     <div class="popup" id="popup">
       <h3 id="titulo-dia">Día</h3>
       <textarea id="input-nota" placeholder="Escribe una nota..."></textarea>
+      <button type="button" id="btn-examinar">Subir imagen...</button>
+      <div id="preview-imagenes" class="preview-imagenes"></div>
       <button id="btn-guardar">Guardar</button>
       <button class="popupButton">Cerrar</button>
     </div>
 
     <script type="module">
+      let imagenesSeleccionadas = [];
+
       if (sessionStorage.getItem("isLoggedIn") !== "true") {
         alert("Acceso no autorizado. Serás redirigido al inicio.");
         window.location.href = "index.html";
@@ -464,22 +527,62 @@
       const tituloDia = document.getElementById("titulo-dia");
       const btnGuardar = document.getElementById("btn-guardar");
 
+      const previewContainer = document.getElementById("preview-imagenes");
       const inputImagen = document.createElement("input");
+
       inputImagen.type = "file";
       inputImagen.accept = "image/*";
+      inputImagen.multiple = true; // Permitir varias
+
       inputImagen.id = "input-imagen";
       inputImagen.style.marginTop = "10px";
-      popup.insertBefore(inputImagen, btnGuardar);
+      popup.insertBefore(inputImagen, previewContainer);
 
-      // Crear botón de eliminar imagen
-      const btnEliminarImagen = document.createElement("button");
-      btnEliminarImagen.textContent = "Eliminar imagen";
-      btnEliminarImagen.id = "btn-eliminar-imagen";
-      btnEliminarImagen.style.marginTop = "10px";
-      popup.insertBefore(btnEliminarImagen, btnGuardar);
+      function renderPreviewItem(src) {
+        const item = document.createElement("div");
+        item.className = "preview-item";
 
-      btnEliminarImagen.addEventListener("click", () => {
-        inputImagen.value = ""; // Limpiar el input de imagen
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "preview";
+
+        const btnEliminar = document.createElement("button");
+        btnEliminar.className = "eliminar-img";
+        btnEliminar.innerHTML = `<img src="trash.png" alt="Eliminar">`;
+
+        btnEliminar.addEventListener("click", () => {
+          imagenesSeleccionadas = imagenesSeleccionadas.filter(
+            (imagen) => imagen !== src
+          );
+          item.remove();
+        });
+
+        item.appendChild(img);
+        item.appendChild(btnEliminar);
+        previewContainer.appendChild(item);
+
+        // 🔥 Aplica el color de la paleta actual
+        const p = paletas[paletaActual];
+        btnEliminar.style.backgroundColor = p.primario;
+        btnEliminar.style.color = "white";
+        btnEliminar.onmouseenter = () =>
+          (btnEliminar.style.backgroundColor = p.primarioHover);
+        btnEliminar.onmouseleave = () =>
+          (btnEliminar.style.backgroundColor = p.primario);
+      }
+
+      // Cuando el usuario selecciona nuevas imágenes
+      inputImagen.addEventListener("change", () => {
+        Array.from(inputImagen.files).forEach((file) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const base64 = e.target.result;
+            imagenesSeleccionadas.push(base64);
+            renderPreviewItem(base64);
+          };
+          reader.readAsDataURL(file);
+        });
+        inputImagen.value = ""; // 🔥 limpia el input para no repetir
       });
 
       let diaSeleccionado = null;
@@ -627,6 +730,20 @@
         });
       }
 
+      document.addEventListener("DOMContentLoaded", () => {
+        const btnExaminar = document.getElementById("btn-examinar");
+        const inputImagen = document.getElementById("input-imagen");
+
+        btnExaminar.addEventListener("click", () => {
+          inputImagen.click(); // abre el selector de archivos
+        });
+
+        inputImagen.addEventListener("change", () => {
+          console.log(inputImagen.files);
+          // Aquí puedes añadir tu código de previsualización
+        });
+      });
+
       selectMes.addEventListener("change", () => {
         currentMonth = parseInt(selectMes.value);
         actualizarSemanas(currentYear, currentMonth, true);
@@ -708,7 +825,7 @@
 
       const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
-      function abrirPopup(dia, mes, anio, notaElemento) {
+      async function abrirPopup(dia, mes, anio, notaElemento) {
         diaSeleccionado = dia;
         tituloDia.textContent = `Día ${dia} de ${meses[mes]} de ${anio}`;
         inputNota.value = notaElemento.textContent || "";
@@ -718,6 +835,26 @@
         popup.dataset.dia = dia;
         popup.dataset.mes = mes;
         popup.dataset.anio = anio;
+
+        imagenesSeleccionadas = []; // 🔥 solo al abrir, para evitar duplicados
+        previewContainer.innerHTML = "";
+
+        const nombreColeccion = `notas${anio}${parseInt(mes) + 1}`;
+        const docRef = doc(db, nombreColeccion, String(dia));
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+
+          // 🔥 cargar las imágenes que ya estaban en Firestore
+          if (data.imagenesBase64 && Array.isArray(data.imagenesBase64)) {
+            imagenesSeleccionadas = [...data.imagenesBase64]; // mantenemos todas
+            imagenesSeleccionadas.forEach((src) => renderPreviewItem(src));
+          } else if (data.imagenBase64) {
+            imagenesSeleccionadas = [data.imagenBase64];
+            renderPreviewItem(data.imagenBase64);
+          }
+        }
       }
 
       btnGuardar.addEventListener("click", async () => {
@@ -728,22 +865,10 @@
 
         const nombreColeccion = `notas${anio}${parseInt(mes) + 1}`;
         const docRef = doc(db, nombreColeccion, dia);
-        const data = { nota };
+        const data = { nota, imagenesBase64: imagenesSeleccionadas };
 
-        const archivo = inputImagen.files[0];
-
-        if (archivo) {
-          const reader = new FileReader();
-          reader.onloadend = async () => {
-            data.imagenBase64 = reader.result;
-            await setDoc(docRef, data);
-            cerrarPopupYActualizar(anio, mes);
-          };
-          reader.readAsDataURL(archivo);
-        } else {
-          await setDoc(docRef, data);
-          cerrarPopupYActualizar(anio, mes);
-        }
+        await setDoc(docRef, data);
+        cerrarPopupYActualizar(anio, mes);
       });
 
       function cerrarPopupYActualizar(anio, mes) {
@@ -840,17 +965,34 @@
               if (docSnap.exists()) {
                 const data = docSnap.data();
                 nota.textContent = data.nota || "";
-                if (data.imagenBase64) {
+                if (data.imagenesBase64 && Array.isArray(data.imagenesBase64)) {
+                  const contenedor = document.createElement("div");
+                  contenedor.className = "imagenes-container";
+
+                  data.imagenesBase64.forEach((src) => {
+                    const img = document.createElement("img");
+                    img.src = src;
+                    img.alt = "Imagen del día";
+                    contenedor.appendChild(img);
+                  });
+
+                  celda.appendChild(contenedor);
+                } else if (data.imagenBase64) {
+                  const contenedor = document.createElement("div");
+                  contenedor.className = "imagenes-container";
+
                   const img = document.createElement("img");
                   img.src = data.imagenBase64;
                   img.alt = "Imagen del día";
-                  img.style.maxWidth = "100%";
-                  img.style.marginTop = "10px";
-                  celda.appendChild(img);
+                  contenedor.appendChild(img);
+
+                  celda.appendChild(contenedor);
                 }
+
                 if (
                   (data.nota && data.nota.trim() !== "") ||
-                  data.imagenBase64
+                  data.imagenBase64 ||
+                  (data.imagenesBase64 && data.imagenesBase64.length > 0)
                 ) {
                   const alerta = document.createElement("span");
                   alerta.textContent = "!";
@@ -917,13 +1059,28 @@
               const data = docSnap.data();
               nota.textContent = data.nota || "";
 
-              if (data.imagenBase64) {
+              if (data.imagenesBase64 && Array.isArray(data.imagenesBase64)) {
+                const contenedor = document.createElement("div");
+                contenedor.className = "imagenes-container";
+
+                data.imagenesBase64.forEach((src) => {
+                  const img = document.createElement("img");
+                  img.src = src;
+                  img.alt = "Imagen del día";
+                  contenedor.appendChild(img);
+                });
+
+                celda.appendChild(contenedor);
+              } else if (data.imagenBase64) {
+                const contenedor = document.createElement("div");
+                contenedor.className = "imagenes-container";
+
                 const img = document.createElement("img");
                 img.src = data.imagenBase64;
                 img.alt = "Imagen del día";
-                img.style.maxWidth = "100%";
-                img.style.marginTop = "10px";
-                celda.appendChild(img);
+                contenedor.appendChild(img);
+
+                celda.appendChild(contenedor);
               }
             } else {
               nota.textContent = "";
@@ -1018,6 +1175,17 @@
             el.style.color = "white";
           });
 
+        // Botón de eliminar imagen (trash)
+        document.querySelectorAll(".eliminar-img").forEach((btn) => {
+          btn.style.backgroundColor = p.primario;
+          btn.style.color = "white";
+
+          // Hover dinámico
+          btn.onmouseenter = () =>
+            (btn.style.backgroundColor = p.primarioHover);
+          btn.onmouseleave = () => (btn.style.backgroundColor = p.primario);
+        });
+
         document
           .querySelectorAll(".calendario, .dia, .login-form, .resumen-semanal")
           .forEach((el) => {
@@ -1064,6 +1232,10 @@
         document.querySelectorAll("#popup button").forEach((btn) => {
           btn.style.backgroundColor = p.primario;
           btn.style.color = "white";
+
+          btn.onmouseenter = () =>
+            (btn.style.backgroundColor = p.primarioHover);
+          btn.onmouseleave = () => (btn.style.backgroundColor = p.primario);
         });
 
         // Input de imagen
